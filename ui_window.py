@@ -2,8 +2,8 @@
 Premium Developer UI for SEB Bot.
 
 Provides:
-- Premium dark response windows
-- Gemini chat window
+- Compact premium dark response windows
+- Compact Gemini chat window
 - Copy button
 - Countdown/type button
 - Always-on-top behavior
@@ -19,7 +19,11 @@ from typing import Optional
 import keyboard_input
 from clipboard_utils import copy_to_clipboard
 from ai_provider import create_chat
-from constants import POPUP_GEOMETRY, TYPE_BUTTON_COUNTDOWN_SECONDS, FOCUS_REGAIN_DELAY
+from constants import (
+    POPUP_GEOMETRY,
+    TYPE_BUTTON_COUNTDOWN_SECONDS,
+    FOCUS_REGAIN_DELAY,
+)
 
 
 _lock = threading.Lock()
@@ -37,7 +41,6 @@ BORDER = "#263241"
 
 FG = "#e6edf3"
 MUTED = "#7d8590"
-SUBTLE = "#484f58"
 
 ACCENT = "#58a6ff"
 ACCENT_HOVER = "#79b8ff"
@@ -50,7 +53,7 @@ TYPE_ELIGIBLE_TAGS = ("SOLVE", "FIX")
 
 
 # ---------------------------------------------------------------------------
-# Small UI helpers
+# Window helpers
 # ---------------------------------------------------------------------------
 
 def _configure_window(root: tk.Tk, title: str, geometry: str):
@@ -58,16 +61,20 @@ def _configure_window(root: tk.Tk, title: str, geometry: str):
     root.configure(bg=BG)
     root.attributes("-topmost", True)
     root.geometry(geometry)
-    root.minsize(520, 420)
+    root.resizable(True, True)
 
 
 def _add_top_bar(root: tk.Tk, title: str, subtitle: str = ""):
     top = tk.Frame(
         root,
         bg=BG,
-        height=62,
+        height=52,
     )
-    top.pack(fill="x", padx=22, pady=(16, 0))
+    top.pack(
+        fill="x",
+        padx=18,
+        pady=(10, 0),
+    )
     top.pack_propagate(False)
 
     left = tk.Frame(top, bg=BG)
@@ -78,7 +85,7 @@ def _add_top_bar(root: tk.Tk, title: str, subtitle: str = ""):
         text=title,
         bg=BG,
         fg=FG,
-        font=("Segoe UI Semibold", 14),
+        font=("Segoe UI Semibold", 13),
     ).pack(anchor="w")
 
     if subtitle:
@@ -87,8 +94,8 @@ def _add_top_bar(root: tk.Tk, title: str, subtitle: str = ""):
             text=subtitle,
             bg=BG,
             fg=MUTED,
-            font=("Segoe UI", 9),
-        ).pack(anchor="w", pady=(2, 0))
+            font=("Segoe UI", 8),
+        ).pack(anchor="w")
 
     close_button = tk.Button(
         top,
@@ -100,18 +107,13 @@ def _add_top_bar(root: tk.Tk, title: str, subtitle: str = ""):
         activeforeground=FG,
         relief="flat",
         bd=0,
-        font=("Segoe UI", 20),
-        padx=8,
+        font=("Segoe UI", 19),
+        padx=6,
         cursor="hand2",
     )
-    close_button.pack(side="right", anchor="n")
-
-
-def _create_separator(parent):
-    return tk.Frame(
-        parent,
-        bg=BORDER,
-        height=1,
+    close_button.pack(
+        side="right",
+        anchor="n",
     )
 
 
@@ -143,7 +145,6 @@ def _build_window(tag_type: str, content: str) -> tk.Tk:
         f"{tag_type} · Response",
     )
 
-    # Main content card
     card = tk.Frame(
         root,
         bg=SURFACE,
@@ -153,8 +154,8 @@ def _build_window(tag_type: str, content: str) -> tk.Tk:
     card.pack(
         fill="both",
         expand=True,
-        padx=22,
-        pady=(4, 14),
+        padx=18,
+        pady=(4, 10),
     )
 
     txt = scrolledtext.ScrolledText(
@@ -168,8 +169,8 @@ def _build_window(tag_type: str, content: str) -> tk.Tk:
         font=("Cascadia Code", 10),
         relief="flat",
         bd=0,
-        padx=18,
-        pady=18,
+        padx=14,
+        pady=14,
         spacing1=2,
         spacing3=6,
     )
@@ -182,15 +183,14 @@ def _build_window(tag_type: str, content: str) -> tk.Tk:
     txt.insert("1.0", content)
     txt.config(state="disabled")
 
-    # Bottom controls
     controls = tk.Frame(
         root,
         bg=BG,
     )
     controls.pack(
         fill="x",
-        padx=22,
-        pady=(0, 18),
+        padx=18,
+        pady=(0, 12),
     )
 
     def copy_clip():
@@ -208,32 +208,33 @@ def _build_window(tag_type: str, content: str) -> tk.Tk:
         bd=0,
         highlightbackground=BORDER,
         highlightthickness=1,
-        padx=18,
-        pady=8,
+        padx=16,
+        pady=7,
         font=("Segoe UI Semibold", 9),
         cursor="hand2",
     )
     copy_button.pack(side="left")
 
     def make_type_btn():
-        """Button that counts down then types the content into the editor."""
-
         btn = tk.Button(
             controls,
-            text=f"Type in editor  ·  {TYPE_BUTTON_COUNTDOWN_SECONDS}s",
-            bg=ACCENT,
+            text=f"Type in editor · {TYPE_BUTTON_COUNTDOWN_SECONDS}s",
+            bg=accent,
             fg="#ffffff",
             activebackground=ACCENT_HOVER,
             activeforeground="#ffffff",
             relief="flat",
             bd=0,
-            padx=18,
-            pady=8,
+            padx=16,
+            pady=7,
             font=("Segoe UI Semibold", 9),
             cursor="hand2",
         )
 
-        btn.pack(side="left", padx=(8, 0))
+        btn.pack(
+            side="left",
+            padx=(7, 0),
+        )
 
         def countdown():
             for i in range(TYPE_BUTTON_COUNTDOWN_SECONDS - 1, 0, -1):
@@ -241,7 +242,7 @@ def _build_window(tag_type: str, content: str) -> tk.Tk:
 
                 try:
                     btn.config(
-                        text=f"Type in editor  ·  {i}s"
+                        text=f"Type in editor · {i}s"
                     )
                 except Exception:
                     return
@@ -260,7 +261,7 @@ def _build_window(tag_type: str, content: str) -> tk.Tk:
         def on_click():
             btn.config(
                 state="disabled",
-                text="Preparing..."
+                text="Preparing...",
             )
 
             threading.Thread(
@@ -311,7 +312,7 @@ def show(tag_type: str, content: str):
 # ---------------------------------------------------------------------------
 
 def show_chat():
-    """Open a dedicated Gemini chat window."""
+    """Open a compact dedicated Gemini chat window."""
 
     def _run():
         try:
@@ -323,7 +324,7 @@ def show_chat():
             _configure_window(
                 root,
                 "SEB Bot · Error",
-                "520x320",
+                "520x300",
             )
 
             _add_top_bar(
@@ -341,8 +342,8 @@ def show_chat():
             card.pack(
                 fill="both",
                 expand=True,
-                padx=22,
-                pady=(4, 22),
+                padx=18,
+                pady=(4, 18),
             )
 
             tk.Label(
@@ -350,11 +351,11 @@ def show_chat():
                 text="Chat could not be started",
                 bg=SURFACE,
                 fg=ERROR,
-                font=("Segoe UI Semibold", 12),
+                font=("Segoe UI Semibold", 11),
             ).pack(
                 anchor="w",
-                padx=20,
-                pady=(24, 8),
+                padx=16,
+                pady=(18, 6),
             )
 
             tk.Label(
@@ -362,13 +363,13 @@ def show_chat():
                 text=str(e),
                 bg=SURFACE,
                 fg=FG,
-                font=("Segoe UI", 10),
+                font=("Segoe UI", 9),
                 wraplength=460,
                 justify="left",
             ).pack(
                 anchor="w",
-                padx=20,
-                pady=(0, 20),
+                padx=16,
+                pady=(0, 14),
             )
 
             tk.Button(
@@ -381,20 +382,20 @@ def show_chat():
                 activeforeground=FG,
                 relief="flat",
                 bd=0,
-                padx=18,
-                pady=8,
+                padx=16,
+                pady=7,
                 font=("Segoe UI Semibold", 9),
                 cursor="hand2",
             ).pack(
                 anchor="w",
-                padx=20,
+                padx=16,
             )
 
             root.mainloop()
             return
 
         # ---------------------------------------------------------------
-        # Chat window
+        # Compact chat window
         # ---------------------------------------------------------------
 
         root = tk.Tk()
@@ -402,7 +403,12 @@ def show_chat():
         _configure_window(
             root,
             "SEB Bot · Gemini",
-            "820x680",
+            "600x480",
+        )
+
+        root.minsize(
+            500,
+            380,
         )
 
         _add_top_bar(
@@ -411,35 +417,8 @@ def show_chat():
             "Gemini · Developer Assistant",
         )
 
-        # Online/status indicator
-        status = tk.Frame(
-            root,
-            bg=BG,
-        )
-        status.pack(
-            fill="x",
-            padx=22,
-            pady=(0, 12),
-        )
-
-        tk.Label(
-            status,
-            text="●",
-            bg=BG,
-            fg=SUCCESS,
-            font=("Segoe UI", 9),
-        ).pack(side="left")
-
-        tk.Label(
-            status,
-            text=" Gemini",
-            bg=BG,
-            fg=MUTED,
-            font=("Segoe UI", 9),
-        ).pack(side="left")
-
         # ---------------------------------------------------------------
-        # Conversation card
+        # Conversation
         # ---------------------------------------------------------------
 
         conversation_card = tk.Frame(
@@ -451,8 +430,8 @@ def show_chat():
         conversation_card.pack(
             fill="both",
             expand=True,
-            padx=22,
-            pady=(0, 12),
+            padx=18,
+            pady=(2, 8),
         )
 
         conversation = scrolledtext.ScrolledText(
@@ -463,13 +442,13 @@ def show_chat():
             insertbackground=FG,
             selectbackground="#264f78",
             selectforeground=FG,
-            font=("Cascadia Code", 10),
+            font=("Cascadia Code", 9),
             relief="flat",
             bd=0,
-            padx=20,
-            pady=18,
-            spacing1=3,
-            spacing3=8,
+            padx=14,
+            pady=12,
+            spacing1=2,
+            spacing3=6,
             state="disabled",
         )
 
@@ -478,7 +457,6 @@ def show_chat():
             expand=True,
         )
 
-        # Message styles
         conversation.tag_config(
             "user_label",
             foreground=ACCENT,
@@ -500,7 +478,7 @@ def show_chat():
         conversation.tag_config(
             "message",
             foreground=FG,
-            font=("Cascadia Code", 10),
+            font=("Cascadia Code", 9),
         )
 
         def add_message(sender: str, message: str):
@@ -529,7 +507,7 @@ def show_chat():
             conversation.see("end")
 
         # ---------------------------------------------------------------
-        # Input area
+        # Input
         # ---------------------------------------------------------------
 
         input_card = tk.Frame(
@@ -540,24 +518,24 @@ def show_chat():
         )
         input_card.pack(
             fill="x",
-            padx=22,
-            pady=(0, 18),
+            padx=18,
+            pady=(0, 12),
         )
 
         user_input = tk.Text(
             input_card,
-            height=3,
+            height=2,
             wrap=tk.WORD,
             bg=SURFACE,
             fg=FG,
             insertbackground=ACCENT,
             selectbackground="#264f78",
             selectforeground=FG,
-            font=("Cascadia Code", 10),
+            font=("Cascadia Code", 9),
             relief="flat",
             bd=0,
-            padx=14,
-            pady=12,
+            padx=12,
+            pady=9,
         )
 
         user_input.pack(
@@ -568,23 +546,23 @@ def show_chat():
 
         send_button = tk.Button(
             input_card,
-            text="Send  ↑",
+            text="Send ↑",
             bg=ACCENT,
             fg="#ffffff",
             activebackground=ACCENT_HOVER,
             activeforeground="#ffffff",
             relief="flat",
             bd=0,
-            padx=18,
-            pady=10,
+            padx=14,
+            pady=8,
             font=("Segoe UI Semibold", 9),
             cursor="hand2",
         )
 
         send_button.pack(
             side="right",
-            padx=10,
-            pady=10,
+            padx=8,
+            pady=8,
         )
 
         # ---------------------------------------------------------------
@@ -607,7 +585,7 @@ def show_chat():
 
             send_button.config(
                 state="disabled",
-                text="Thinking..."
+                text="...",
             )
 
             user_input.config(
@@ -640,7 +618,7 @@ def show_chat():
 
                         send_button.config(
                             state="normal",
-                            text="Send  ↑",
+                            text="Send ↑",
                         )
 
                         user_input.config(
@@ -664,7 +642,7 @@ def show_chat():
 
                         send_button.config(
                             state="normal",
-                            text="Send  ↑",
+                            text="Send ↑",
                         )
 
                         user_input.config(
@@ -688,8 +666,6 @@ def show_chat():
         )
 
         def enter_handler(event):
-            # Ctrl+Enter sends the message.
-            # Normal Enter creates a new line.
             if event.state & 0x0001:
                 return
 
