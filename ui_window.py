@@ -411,10 +411,76 @@ def show_chat():
             380,
         )
 
-        _add_top_bar(
+        # Main window uses GRID so the input area can never be pushed
+        # below the visible window.
+        root.grid_rowconfigure(0, weight=0)
+        root.grid_rowconfigure(1, weight=1)
+        root.grid_rowconfigure(2, weight=0)
+
+        root.grid_columnconfigure(0, weight=1)
+
+        # ---------------------------------------------------------------
+        # Header
+        # ---------------------------------------------------------------
+
+        header = tk.Frame(
             root,
-            "SEB Bot",
-            "Gemini · Developer Assistant",
+            bg=BG,
+        )
+
+        header.grid(
+            row=0,
+            column=0,
+            sticky="ew",
+            padx=18,
+            pady=(10, 8),
+        )
+
+        header.grid_columnconfigure(0, weight=1)
+
+        left = tk.Frame(
+            header,
+            bg=BG,
+        )
+        left.grid(
+            row=0,
+            column=0,
+            sticky="w",
+        )
+
+        tk.Label(
+            left,
+            text="SEB Bot",
+            bg=BG,
+            fg=FG,
+            font=("Segoe UI Semibold", 13),
+        ).pack(anchor="w")
+
+        tk.Label(
+            left,
+            text="Gemini · Developer Assistant",
+            bg=BG,
+            fg=MUTED,
+            font=("Segoe UI", 8),
+        ).pack(anchor="w")
+
+        tk.Button(
+            header,
+            text="×",
+            command=root.destroy,
+            bg=BG,
+            fg=MUTED,
+            activebackground=BG,
+            activeforeground=FG,
+            relief="flat",
+            bd=0,
+            font=("Segoe UI", 19),
+            padx=6,
+            cursor="hand2",
+        ).grid(
+            row=0,
+            column=1,
+            sticky="ne",
         )
 
         # ---------------------------------------------------------------
@@ -427,11 +493,13 @@ def show_chat():
             highlightbackground=BORDER,
             highlightthickness=1,
         )
-        conversation_card.pack(
-            fill="both",
-            expand=True,
+
+        conversation_card.grid(
+            row=1,
+            column=0,
+            sticky="nsew",
             padx=18,
-            pady=(2, 8),
+            pady=(0, 8),
         )
 
         conversation = scrolledtext.ScrolledText(
@@ -507,7 +575,7 @@ def show_chat():
             conversation.see("end")
 
         # ---------------------------------------------------------------
-        # Input
+        # Input area
         # ---------------------------------------------------------------
 
         input_card = tk.Frame(
@@ -516,10 +584,18 @@ def show_chat():
             highlightbackground=BORDER,
             highlightthickness=1,
         )
-        input_card.pack(
-            fill="x",
+
+        input_card.grid(
+            row=2,
+            column=0,
+            sticky="ew",
             padx=18,
             pady=(0, 12),
+        )
+
+        input_card.grid_columnconfigure(
+            0,
+            weight=1,
         )
 
         user_input = tk.Text(
@@ -538,10 +614,11 @@ def show_chat():
             pady=9,
         )
 
-        user_input.pack(
-            side="left",
-            fill="both",
-            expand=True,
+        user_input.grid(
+            row=0,
+            column=0,
+            sticky="nsew",
+            padx=(0, 0),
         )
 
         send_button = tk.Button(
@@ -559,8 +636,9 @@ def show_chat():
             cursor="hand2",
         )
 
-        send_button.pack(
-            side="right",
+        send_button.grid(
+            row=0,
+            column=1,
             padx=8,
             pady=8,
         )
