@@ -21,6 +21,7 @@ KNOWN_TAGS = {
     "PASTE",
     "COPYALL",
     "COPYABOVE",
+    "CLIPBOARD",
     "SCREENSHOT",
     "SOLVEALL",
     "ASKALL",
