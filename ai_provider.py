@@ -22,41 +22,41 @@ SYSTEM_PROMPTS = {
         "Output ONLY the complete solution code. No prose, no markdown fences."
     ),
     "ASK": (
-    "You are an expert programming tutor and problem-solving assistant. "
-    "Answer the user's question completely, accurately, and directly in English. "
-    "The user may ask questions about Data Structures and Algorithms (DSA), "
-    "Java, Object-Oriented Programming (OOP/OOPs), SQL, DBMS, C, C++, "
-    "programming logic, algorithms, complexity analysis, debugging, syntax, "
-    "database queries, or related computer science topics. "
-    "You must understand exactly what the user is asking and provide the answer "
-    "they need rather than only giving hints or asking them to figure it out themselves. "
-    "If the user asks for code, provide the complete working code. "
-    "If the user asks for an SQL query, provide the complete SQL query. "
-    "If the user asks for a Java program, provide the complete Java program. "
-    "If the user asks for a DSA solution, provide the complete solution, including "
-    "the algorithm and code when appropriate. "
-    "If the user asks to fix code, identify the problem and provide the corrected code. "
-    "If the user asks for an explanation, explain the concept clearly and then give "
-    "an example when useful. "
-    "For DSA questions, explain the approach, important steps, and time and space "
-    "complexity when relevant. "
-    "For SQL questions, make sure the query actually satisfies the requested operation "
-    "such as SELECT, WHERE, JOIN, GROUP BY, HAVING, ORDER BY, aggregate functions, "
-    "subqueries, or other required clauses. "
-    "For Java and OOP questions, use correct Java syntax and explain relevant concepts "
-    "such as classes, objects, inheritance, polymorphism, encapsulation, abstraction, "
-    "interfaces, constructors, methods, arrays, collections, exceptions, and related topics "
-    "when they are relevant to the question. "
-    "Do not intentionally withhold the final answer. "
-    "Do not respond with vague hints when the user is asking for a solution. "
-    "Do not tell the user to write the code/query themselves. "
-    "Use the exact requirements given by the user and do not add unrelated material. "
-    "Keep the response concise enough to be useful, but include all information necessary "
-    "to completely answer the question. "
-    "Use plain text formatting only. Do not use Markdown, bold, italics, underline, "
-    "or decorative formatting. "
-    "When code is required, output readable code in a code block only when necessary "
-    "for clarity."
+        "You are an expert programming tutor and problem-solving assistant. "
+        "Answer the user's question completely, accurately, and directly in English. "
+        "The user may ask questions about Data Structures and Algorithms (DSA), "
+        "Java, Object-Oriented Programming (OOP/OOPs), SQL, DBMS, C, C++, "
+        "programming logic, algorithms, complexity analysis, debugging, syntax, "
+        "database queries, or related computer science topics. "
+        "You must understand exactly what the user is asking and provide the answer "
+        "they need rather than only giving hints or asking them to figure it out themselves. "
+        "If the user asks for code, provide the complete working code. "
+        "If the user asks for an SQL query, provide the complete SQL query. "
+        "If the user asks for a Java program, provide the complete Java program. "
+        "If the user asks for a DSA solution, provide the complete solution, including "
+        "the algorithm and code when appropriate. "
+        "If the user asks to fix code, identify the problem and provide the corrected code. "
+        "If the user asks for an explanation, explain the concept clearly and then give "
+        "an example when useful. "
+        "For DSA questions, explain the approach, important steps, and time and space "
+        "complexity when relevant. "
+        "For SQL questions, make sure the query actually satisfies the requested operation "
+        "such as SELECT, WHERE, JOIN, GROUP BY, HAVING, ORDER BY, aggregate functions, "
+        "subqueries, or other required clauses. "
+        "For Java and OOP questions, use correct Java syntax and explain relevant concepts "
+        "such as classes, objects, inheritance, polymorphism, encapsulation, abstraction, "
+        "interfaces, constructors, methods, arrays, collections, exceptions, and related topics "
+        "when they are relevant to the question. "
+        "Do not intentionally withhold the final answer. "
+        "Do not respond with vague hints when the user is asking for a solution. "
+        "Do not tell the user to write the code/query themselves. "
+        "Use the exact requirements given by the user and do not add unrelated material. "
+        "Keep the response concise enough to be useful, but include all information necessary "
+        "to completely answer the question. "
+        "Use plain text formatting only. Do not use Markdown, bold, italics, underline, "
+        "or decorative formatting. "
+        "When code is required, output readable code in a code block only when necessary "
+        "for clarity."
     ),
     "SOLVE": (
         "You are a code generator. "
@@ -82,14 +82,18 @@ MAX_TOKENS = {
 def detect_provider() -> str:
     """Automatically detect AI provider based on API key format."""
     explicit = Settings.get("provider", "").lower()
+
     if explicit in ("groq", "gemini", "mistral"):
         return explicit
 
     key = Settings.get("api_key", "")
+
     if key.startswith("gsk_"):
         return "groq"
+
     if key.startswith(("AIzaSy", "AQ.")):
         return "gemini"
+
     return "mistral"
 
 
@@ -113,7 +117,11 @@ class AIProvider(ABC):
                 return self._request(tag_type, user_msg)
             except RateLimitError:
                 if attempt < RETRY_ATTEMPTS:
-                    print(f"[AI] Rate limit — ממתין {RETRY_WAIT_SECONDS} שניות... (ניסיון {attempt}/{RETRY_ATTEMPTS})")
+                    print(
+                        f"[AI] Rate limit — ממתין "
+                        f"{RETRY_WAIT_SECONDS} שניות... "
+                        f"(ניסיון {attempt}/{RETRY_ATTEMPTS})"
+                    )
                     time.sleep(RETRY_WAIT_SECONDS)
                 else:
                     raise
@@ -148,7 +156,11 @@ class GeminiProvider(AIProvider):
                     "google-genai not installed. "
                     "Install with: pip install google-genai"
                 )
-            self.client = genai.Client(api_key=Settings["api_key"])
+
+            self.client = genai.Client(
+                api_key=Settings["api_key"]
+            )
+
         return self.client
 
     def _request(self, tag_type: str, user_msg: str) -> str:
@@ -156,7 +168,10 @@ class GeminiProvider(AIProvider):
 
         client = self._get_client()
         system, max_tokens = _system_and_limit(tag_type)
-        model = Settings.get("model", "gemini-2.0-flash-lite")
+        model = Settings.get(
+            "model",
+            "gemini-2.0-flash-lite"
+        )
 
         try:
             response = client.models.generate_content(
@@ -168,10 +183,13 @@ class GeminiProvider(AIProvider):
                     temperature=0.3,
                 ),
             )
+
             return response.text.strip()
+
         except Exception as e:
             if "429" in str(e):
                 raise RateLimitError(str(e)) from e
+
             raise
 
 
@@ -193,28 +211,44 @@ class GroqProvider(AIProvider):
                     "groq not installed. "
                     "Install with: pip install groq"
                 )
-            self.client = Groq(api_key=Settings["api_key"])
+
+            self.client = Groq(
+                api_key=Settings["api_key"]
+            )
+
         return self.client
 
     def _request(self, tag_type: str, user_msg: str) -> str:
         client = self._get_client()
         system, max_tokens = _system_and_limit(tag_type)
-        model = Settings.get("model", "llama-3.3-70b-versatile")
+        model = Settings.get(
+            "model",
+            "llama-3.3-70b-versatile"
+        )
 
         try:
             resp = client.chat.completions.create(
                 model=model,
                 messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user_msg},
+                    {
+                        "role": "system",
+                        "content": system
+                    },
+                    {
+                        "role": "user",
+                        "content": user_msg
+                    },
                 ],
                 max_tokens=max_tokens,
                 temperature=0.3,
             )
+
             return resp.choices[0].message.content.strip()
+
         except Exception as e:
             if "429" in str(e):
                 raise RateLimitError(str(e)) from e
+
             raise
 
 
@@ -233,7 +267,10 @@ class MistralProvider(AIProvider):
             )
 
         system, max_tokens = _system_and_limit(tag_type)
-        model = Settings.get("model", "mistral-small-latest")
+        model = Settings.get(
+            "model",
+            "mistral-small-latest"
+        )
 
         resp = requests.post(
             "https://api.mistral.ai/v1/chat/completions",
@@ -244,8 +281,14 @@ class MistralProvider(AIProvider):
             json={
                 "model": model,
                 "messages": [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user_msg}
+                    {
+                        "role": "system",
+                        "content": system
+                    },
+                    {
+                        "role": "user",
+                        "content": user_msg
+                    }
                 ],
                 "max_tokens": max_tokens,
                 "temperature": 0.3
@@ -254,9 +297,12 @@ class MistralProvider(AIProvider):
         )
 
         if resp.status_code == 429:
-            raise RateLimitError(f"429: {resp.text}")
+            raise RateLimitError(
+                f"429: {resp.text}"
+            )
 
         resp.raise_for_status()
+
         return resp.json()["choices"][0]["message"]["content"].strip()
 
 
@@ -278,11 +324,18 @@ def get_provider() -> AIProvider:
 
     with _provider_lock:
         if provider_name not in _provider_instances:
-            _provider_instances[provider_name] = _PROVIDER_CLASSES[provider_name]()
+            _provider_instances[provider_name] = (
+                _PROVIDER_CLASSES[provider_name]()
+            )
+
         return _provider_instances[provider_name]
 
 
-def ask_ai(tag_type: str, content: str, context: str = "") -> str:
+def ask_ai(
+    tag_type: str,
+    content: str,
+    context: str = ""
+) -> str:
     """
     Send a request to the configured AI provider.
 
@@ -295,8 +348,12 @@ def ask_ai(tag_type: str, content: str, context: str = "") -> str:
     Returns:
         AI response text
     """
+
     if tag_type == "FIX" and context:
-        user_msg = f"Code:\n{context}\n\nFix instruction: {content}"
+        user_msg = (
+            f"Code:\n{context}\n\n"
+            f"Fix instruction: {content}"
+        )
     else:
         user_msg = content
 
@@ -304,30 +361,50 @@ def ask_ai(tag_type: str, content: str, context: str = "") -> str:
         raise ValueError("Request cannot be empty")
 
     provider = get_provider()
-    return provider.generate(tag_type, user_msg)
 
+    return provider.generate(
+        tag_type,
+        user_msg
+    )
+
+
+# ── Gemini Chat ──────────────────────────────────────────────────────────────
 
 def create_chat():
     """
     Create a dedicated Gemini chat session for @@CHAT@@.
+
     Uses the existing Gemini provider/client so the client
     remains alive for the entire chat session.
     """
+
     if detect_provider() != "gemini":
-        raise RuntimeError("CHAT requires Gemini as the configured provider.")
+        raise RuntimeError(
+            "CHAT requires Gemini as the configured provider."
+        )
 
     from google.genai import types
 
     provider = get_provider()
     client = provider._get_client()
 
-    model = Settings.get("model", "gemini-3.5")
+    model = Settings.get(
+        "model",
+        "gemini-3.5"
+    )
 
     system = (
         "You are a helpful programming assistant. "
         "Answer the user's questions clearly and directly. "
-        "The user may ask about programming, code, debugging, or general questions. "
-        "Maintain the context of the conversation."
+        "The user may ask about programming, code, debugging, DSA, Java, "
+        "SQL, DBMS, OOP, or general questions. "
+        "Maintain the context of the conversation. "
+        "Use the screenshot provided at the beginning of the conversation "
+        "as visual context whenever it is relevant. "
+        "Do not forget information visible in the screenshot. "
+        "Answer in English. "
+        "Use plain text formatting only. "
+        "Do not use bold, italics, underline, or decorative formatting."
     )
 
     return client.chats.create(
@@ -337,3 +414,43 @@ def create_chat():
             temperature=0.3,
         ),
     )
+
+
+def start_chat_with_screenshot(screenshot_path: str):
+    """
+    Create a Gemini chat and send a screenshot as its first message.
+
+    The screenshot becomes part of the chat's conversation context,
+    allowing all subsequent chat messages to refer to it.
+    """
+
+    if detect_provider() != "gemini":
+        raise RuntimeError(
+            "SSTOCHAT requires Gemini as the configured provider."
+        )
+
+    from google.genai import types
+
+    chat = create_chat()
+
+    with open(screenshot_path, "rb") as image_file:
+        image_bytes = image_file.read()
+
+    response = chat.send_message(
+        [
+            types.Part.from_bytes(
+                data=image_bytes,
+                mime_type="image/png",
+            ),
+            types.Part.from_text(
+                text=(
+                    "This screenshot is the initial context for our chat. "
+                    "Study it carefully and keep its contents in context. "
+                    "Do not describe the screenshot unless asked. "
+                    "Wait for my next question."
+                ),
+            ),
+        ]
+    )
+
+    return chat, response
