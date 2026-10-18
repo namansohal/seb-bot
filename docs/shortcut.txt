@@ -1,0 +1,14 @@
+| Current | Short |
+|---|---|
+| `@@ASK@@` | `@A@` |
+| `@@SOLVE@@` | `@S@` |
+| `@@FIX@@` | `@F@` |
+| `@@COPY@@` | `@C@` |
+| `@@COPYABOVE@@` | `@CA@` |
+| `@@COPYALL@@` | `@CC@` |
+| `@@CLIPBOARD@@` | `@CB@` |
+| `@@PASTE@@` | `@P@` |
+| `@@CHAT@@` | `@CH@` |
+| `@@SCREENSHOT@@` | `@SS@` |
+| `@@ASKALL@@` | `@AA@` |
+| `@@SOLVEALL@@` | `@SA@` |
