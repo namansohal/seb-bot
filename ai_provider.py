@@ -22,7 +22,7 @@ SYSTEM_PROMPTS = {
         "Output ONLY the complete solution code. No prose, no markdown fences."
     ),
     "ASK": (
-        "You are a programming tutor. Answer in Hebrew. "
+        "You are a programming tutor. Answer in English. "
         "Be concise: 2-4 sentences. "
         "Give hints and explanations only — never write a full solution or complete code."
     ),
