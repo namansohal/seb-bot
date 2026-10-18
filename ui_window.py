@@ -5,6 +5,7 @@ Provides:
 - Compact premium dark response windows
 - Compact Gemini chat window
 - Screenshot-aware Gemini chat
+- Ability to add additional screenshots to the active chat
 - Copy button
 - Countdown/type button
 - Always-on-top behavior
@@ -20,7 +21,11 @@ from typing import Optional
 
 import keyboard_input
 from clipboard_utils import copy_to_clipboard
-from ai_provider import create_chat, start_chat_with_screenshot
+from ai_provider import (
+    create_chat,
+    start_chat_with_screenshot,
+    send_screenshot_to_chat,
+)
 from constants import (
     POPUP_GEOMETRY,
     TYPE_BUTTON_COUNTDOWN_SECONDS,
@@ -38,6 +43,10 @@ _ui_started = threading.Event()
 
 _active_window = None
 _ui_lock = threading.Lock()
+
+# Current Gemini chat session.
+# This allows @@SSTOSS@@ to add screenshots to the already-open chat.
+_active_chat = None
 
 
 # ---------------------------------------------------------------------------
@@ -327,6 +336,8 @@ def _show_response(tag_type: str, content: str):
 # ---------------------------------------------------------------------------
 
 def _show_chat(screenshot_path: Optional[str] = None):
+    global _active_chat
+
     try:
         if screenshot_path:
             chat, initial_response = start_chat_with_screenshot(
@@ -335,6 +346,9 @@ def _show_chat(screenshot_path: Optional[str] = None):
         else:
             chat = create_chat()
             initial_response = None
+
+        # Keep the chat available so @@SSTOSS@@ can add more screenshots.
+        _active_chat = chat
 
     except Exception as e:
         root = tk.Toplevel(_ui_root)
@@ -614,7 +628,7 @@ def _show_chat(screenshot_path: Optional[str] = None):
         else:
             add_message(
                 "Gemini",
-                "Screenshot attached as the initial context. Ready for your question.",
+                "Ready. Ask me anything about your code or project.",
             )
     else:
         add_message(
@@ -806,6 +820,36 @@ def _show_chat(screenshot_path: Optional[str] = None):
 
 
 # ---------------------------------------------------------------------------
+# Add another screenshot to the active Gemini chat
+# ---------------------------------------------------------------------------
+
+def _add_screenshot_to_chat(screenshot_path: str):
+    global _active_chat
+
+    if _active_chat is None:
+        print(
+            "[UI] SSTOSS requested, but there is no active Gemini chat."
+        )
+        return
+
+    try:
+        send_screenshot_to_chat(
+            _active_chat,
+            screenshot_path,
+        )
+
+        print(
+            f"[UI] Additional screenshot added to active Gemini chat: "
+            f"{screenshot_path}"
+        )
+
+    except Exception as e:
+        print(
+            f"[UI] Could not add screenshot to Gemini chat: {e}"
+        )
+
+
+# ---------------------------------------------------------------------------
 # Dedicated Tkinter UI thread
 # ---------------------------------------------------------------------------
 
@@ -833,6 +877,9 @@ def _ui_worker():
 
                     elif action == "chat":
                         _show_chat(*args)
+
+                    elif action == "add_screenshot":
+                        _add_screenshot_to_chat(*args)
 
             except queue.Empty:
                 pass
@@ -887,7 +934,9 @@ def show(tag_type: str, content: str):
         )
 
     except Exception as e:
-        print(f"[UI] Could not show response window: {e}")
+        print(
+            f"[UI] Could not show response window: {e}"
+        )
 
 
 def show_chat(screenshot_path: Optional[str] = None):
@@ -909,4 +958,30 @@ def show_chat(screenshot_path: Optional[str] = None):
         )
 
     except Exception as e:
-        print(f"[UI] Could not open chat window: {e}")
+        print(
+            f"[UI] Could not open chat window: {e}"
+        )
+
+
+def add_screenshot_to_chat(screenshot_path: str):
+    """
+    Add another screenshot to the currently active Gemini chat.
+
+    The existing chat session is preserved, so Gemini keeps the
+    previous screenshot(s) and all previous messages in context.
+    """
+
+    try:
+        _ensure_ui_thread()
+
+        _ui_queue.put(
+            (
+                "add_screenshot",
+                (screenshot_path,),
+            )
+        )
+
+    except Exception as e:
+        print(
+            f"[UI] Could not add screenshot to chat: {e}"
+        )

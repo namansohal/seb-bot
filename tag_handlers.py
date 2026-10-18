@@ -139,6 +139,48 @@ def handle_sstochat(content: str, full_text: str):
         )
 
 
+def handle_sstoss(content: str, full_text: str):
+    """
+    Take another screenshot and add it to the already-open
+    Gemini chat created by @@SSTOCHAT@@.
+    """
+
+    try:
+        import pyautogui
+    except ImportError:
+        ui_window.show(
+            "ERROR",
+            "pyautogui is not installed. Run: pip install pyautogui"
+        )
+        return
+
+    try:
+        filename = (
+            f"screenshot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+        )
+
+        save_path = Path(__file__).parent / filename
+
+        print("[Agent] Taking additional screenshot for SSTOSS...")
+
+        img = pyautogui.screenshot()
+        img.save(str(save_path))
+
+        print(
+            f"[Agent] Additional screenshot saved: {save_path}"
+        )
+
+        ui_window.add_screenshot_to_chat(
+            str(save_path)
+        )
+
+    except Exception as e:
+        ui_window.show(
+            "ERROR",
+            f"SSTOSS error:\n{_format_error(e)}"
+        )
+
+
 def handle_askall(content: str, full_text: str):
     code = _code_above_tag(full_text, "@@ASKALL")
 
@@ -430,6 +472,7 @@ def handle_chat(content: str, full_text: str):
 HANDLERS = {
     "SCREENSHOT": handle_screenshot,
     "SSTOCHAT":   handle_sstochat,
+    "SSTOSS":     handle_sstoss,
     "ASKALL":     handle_askall,
     "SOLVEALL":   handle_solveall,
     "COPYALL":    handle_copyall,

@@ -372,7 +372,7 @@ def ask_ai(
 
 def create_chat():
     """
-    Create a dedicated Gemini chat session for @@CHAT@@.
+    Create a dedicated Gemini chat session for @@CHAT@@ and @@SSTOCHAT@@.
 
     Uses the existing Gemini provider/client so the client
     remains alive for the entire chat session.
@@ -380,7 +380,7 @@ def create_chat():
 
     if detect_provider() != "gemini":
         raise RuntimeError(
-            "CHAT requires Gemini as the configured provider."
+            "CHAT and SSTOCHAT require Gemini as the configured provider."
         )
 
     from google.genai import types
@@ -399,9 +399,9 @@ def create_chat():
         "The user may ask about programming, code, debugging, DSA, Java, "
         "SQL, DBMS, OOP, or general questions. "
         "Maintain the context of the conversation. "
-        "Use the screenshot provided at the beginning of the conversation "
-        "as visual context whenever it is relevant. "
-        "Do not forget information visible in the screenshot. "
+        "Use any screenshots provided in the conversation as visual context "
+        "whenever relevant. "
+        "Do not forget information visible in screenshots. "
         "Answer in English. "
         "Use plain text formatting only. "
         "Do not use bold, italics, underline, or decorative formatting."
@@ -454,3 +454,42 @@ def start_chat_with_screenshot(screenshot_path: str):
     )
 
     return chat, response
+
+
+def send_screenshot_to_chat(chat, screenshot_path: str):
+    """
+    Send another screenshot to an existing Gemini chat session.
+
+    The screenshot is added to the same conversation, so Gemini
+    can use both the original screenshot and this new screenshot
+    in subsequent messages.
+    """
+
+    if detect_provider() != "gemini":
+        raise RuntimeError(
+            "SSTOSS requires Gemini as the configured provider."
+        )
+
+    from google.genai import types
+
+    with open(screenshot_path, "rb") as image_file:
+        image_bytes = image_file.read()
+
+    response = chat.send_message(
+        [
+            types.Part.from_bytes(
+                data=image_bytes,
+                mime_type="image/png",
+            ),
+            types.Part.from_text(
+                text=(
+                    "This is an additional screenshot for our current "
+                    "conversation. Study it carefully and keep it in "
+                    "context together with all previous screenshots. "
+                    "Do not describe the screenshot unless asked."
+                ),
+            ),
+        ]
+    )
+
+    return response

@@ -70,6 +70,9 @@ REPEATABLE_TAGS = {
     "SCREENSHOT",
     "COPYALL",
     "COPYABOVE",
+    "SSTOCHAT",
+    "SSTOSS",
+    "CHAT",
 }
 
 
@@ -118,6 +121,8 @@ def _print_banner():
     print("  @@PASTE@@                -> Paste Clipboard contents two lines below")
     print("  @@CHAT@@                 -> Open Gemini chat")
     print("  @@SCREENSHOT@@           -> Take a screenshot and save it as PNG")
+    print("  @@SSTOCHAT@@             -> Screenshot and open Gemini chat with it")
+    print("  @@SSTOSS@@               -> Add another screenshot to current chat")
     print()
 
     print("Waiting for tags... (Ctrl+C to stop)")
@@ -157,7 +162,8 @@ def main():
                     key = f"{tag_type}:{content}"
 
                     # If the same tag is still present after it has fired,
-                    # do nothing. This prevents CHAT from opening repeatedly.
+                    # do nothing. This prevents repeatable tags from firing
+                    # continuously while their marker remains in the field.
                     if key == last_processed_key:
                         pending_key = None
                         pending_since = None

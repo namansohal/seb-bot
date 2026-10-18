@@ -4,8 +4,8 @@ Detect @@TAG: content@@ patterns in text.
 Hash is updated only AFTER processing — not on detection.
 This prevents losing the tag when the user switches windows mid-typing.
 
-CHAT and SSTOCHAT are repeatable, so their windows can be closed
-and reopened without restarting the bot.
+CHAT, SSTOCHAT, and SSTOSS are repeatable, so their windows/actions
+can be used again without restarting the bot.
 """
 
 import re
@@ -27,6 +27,7 @@ KNOWN_TAGS = {
     "ASKALL",
     "CHAT",
     "SSTOCHAT",
+    "SSTOSS",
 }
 
 _processed_hash: str | None = None
@@ -66,10 +67,10 @@ def is_new(tag_type: str, content: str) -> bool:
     """
     Return True if this tag has not been processed yet.
 
-    CHAT and SSTOCHAT are always repeatable so their windows
-    can be closed and opened again without restarting the bot.
+    CHAT, SSTOCHAT, and SSTOSS are always repeatable so their
+    windows/actions can be used again without restarting the bot.
     """
-    if tag_type in ("CHAT", "SSTOCHAT"):
+    if tag_type in ("CHAT", "SSTOCHAT", "SSTOSS"):
         return True
 
     return _compute_hash(
