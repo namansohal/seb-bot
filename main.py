@@ -152,24 +152,24 @@ def main():
             if text and "@@" in text:
                 result = peek_tag(text)
 
-                # If a different complete tag now appears, reset the hash
-                # so it can fire again while ignoring incomplete tags.
-                if last_processed_key and result:
-                    current_key = f"{result[0]}:{result[1]}"
-
-                    if current_key != last_processed_key:
-                        reset_hash()
-                        last_processed_key = None
-
                 if result:
                     tag_type, content = result
                     key = f"{tag_type}:{content}"
 
-                    if (
+                    # If the same tag is still present after it has fired,
+                    # do nothing. This prevents CHAT from opening repeatedly.
+                    if key == last_processed_key:
+                        pending_key = None
+                        pending_since = None
+                        pending_data = None
+
+                    elif (
                         not is_new(tag_type, content)
                         and tag_type not in REPEATABLE_TAGS
                     ):
-                        pass
+                        pending_key = None
+                        pending_since = None
+                        pending_data = None
 
                     elif key != pending_key:
                         pending_key = key
@@ -215,6 +215,14 @@ def main():
                                 args=pending_data,
                                 daemon=True,
                             ).start()
+
+            # If the tag disappears, allow the same tag to be used again.
+            elif last_processed_key:
+                reset_hash()
+                last_processed_key = None
+                pending_key = None
+                pending_since = None
+                pending_data = None
 
             # NOTE: We do NOT reset pending when text disappears.
             # The user may have temporarily switched to another window.
