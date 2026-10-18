@@ -25,7 +25,7 @@ from constants import (
 
 
 def _code_above_tag(full_text: str, tag_marker: str) -> str:
-    """Return the text preceding the given tag marker (e.g. '@@ASKALL')."""
+    """Return the text preceding the given tag marker (e.g., '@@ASKALL')."""
     tag_pos = full_text.upper().find(tag_marker)
     return full_text[:tag_pos].strip() if tag_pos > 0 else ""
 
@@ -48,7 +48,7 @@ def _deliver_ai_response(tag_type: str, response: str):
 def _format_error(e: Exception) -> str:
     err_str = str(e)
     if "<html" in err_str.lower() or "<!doctype" in err_str.lower():
-        return "ה-API חסום ע\"י פילטר רשת (NetFree?)\nנסי API אחר או בדקי הגדרות NetFree."
+        return "The API is blocked by a network filter (NetFree?).\nTry another API or check your NetFree settings."
     if len(err_str) > ERROR_MESSAGE_MAX_LENGTH:
         return err_str[:ERROR_MESSAGE_MAX_LENGTH] + "..."
     return err_str
@@ -60,7 +60,7 @@ def handle_screenshot(content: str, full_text: str):
     try:
         import pyautogui
     except ImportError:
-        ui_window.show("ERROR", "pyautogui לא מותקן. הריצי: pip install pyautogui")
+        ui_window.show("ERROR", "pyautogui is not installed. Run: pip install pyautogui")
         return
 
     try:
@@ -68,89 +68,101 @@ def handle_screenshot(content: str, full_text: str):
         save_path = Path(__file__).parent / filename
         img = pyautogui.screenshot()
         img.save(str(save_path))
-        ui_window.show("SCREENSHOT", f"✅ צילום מסך נשמר:\n\n{save_path}")
+        ui_window.show("SCREENSHOT", f"Screenshot saved:\n\n{save_path}")
         print(f"[Agent] Screenshot saved: {save_path}")
     except Exception as e:
-        ui_window.show("ERROR", f"שגיאה בצילום מסך:\n{e}")
+        ui_window.show("ERROR", f"Screenshot error:\n{e}")
 
 
 def handle_askall(content: str, full_text: str):
     code = _code_above_tag(full_text, "@@ASKALL")
     if not code:
-        ui_window.show("ERROR", "⚠️ אין קוד מעל התגית\nדוגמה:\n  [הקוד שלך]\n  @@ASKALL: למה הלולאה לא עוצרת?@@")
+        ui_window.show("ERROR", "No code above the tag.\nExample:\n  [your code]\n  @@ASKALL: Why does the loop not stop?@@")
         return
     if not content:
-        ui_window.show("ERROR", "⚠️ כתבי שאלה בתוך התגית:\n@@ASKALL: השאלה שלך@@")
+        ui_window.show("ERROR", "Write a question inside the tag:\n@@ASKALL: Your question@@")
         return
 
     code = _truncate(code, ASKALL_CODE_CONTEXT_LIMIT)
 
     try:
-        print("[Agent] שולח ל-AI (ASKALL)...")
+        print("[Agent] Sending to AI (ASKALL)...")
         response = ask_ai("ASKALL", f"Code:\n{code}\n\nQuestion: {content}")
-        print(f"[Agent] תשובה התקבלה ({len(response)} תווים)")
+        print(f"[Agent] Response received ({len(response)} characters)")
         ui_window.show("ASK", response)
     except Exception as e:
-        ui_window.show("ERROR", f"שגיאה:\n{_format_error(e)}")
+        ui_window.show("ERROR", f"Error:\n{_format_error(e)}")
 
 
 def handle_solveall(content: str, full_text: str):
     clean = re.sub(r'@@SOLVEALL@@', '', full_text).strip()
     if not clean:
-        ui_window.show("ERROR", "⚠️ השדה ריק — אין תרגיל לקרוא")
+        ui_window.show("ERROR", "The field is empty — there is no exercise to read.")
         return
 
     clean = _truncate(clean, SOLVEALL_FIELD_LIMIT, from_end=False)
 
     try:
-        print(f"[Agent] שולח ל-AI (SOLVEALL, {len(clean)} תווים)...")
+        print(f"[Agent] Sending to AI (SOLVEALL, {len(clean)} characters)...")
         response = ask_ai("SOLVEALL", clean)
-        print(f"[Agent] תשובה התקבלה ({len(response)} תווים)")
+        print(f"[Agent] Response received ({len(response)} characters)")
         ui_window.show("SOLVE", response)
     except Exception as e:
-        ui_window.show("ERROR", f"שגיאה:\n{_format_error(e)}")
+        ui_window.show("ERROR", f"Error:\n{_format_error(e)}")
 
 
 def handle_copyall(content: str, full_text: str):
     clean = re.sub(r'@@COPYALL@@', '', full_text).strip()
     if copy_to_clipboard(clean):
-        ui_window.show("COPY", f"✅ הועתק ל-Clipboard:\n\n{clean[:POPUP_CLIPBOARD_PREVIEW_LENGTH]}")
+        ui_window.show(
+            "COPY",
+            f"Copied to Clipboard:\n\n{clean[:POPUP_CLIPBOARD_PREVIEW_LENGTH]}"
+        )
     else:
-        ui_window.show("ERROR", "שגיאה בהעתקה ל-Clipboard")
+        ui_window.show("ERROR", "Failed to copy to Clipboard")
 
 
 def handle_copyabove(content: str, full_text: str):
     above = _code_above_tag(full_text, "@@COPYABOVE@@")
     if not above:
-        ui_window.show("COPY", "⚠️ אין טקסט מעל התגית")
+        ui_window.show("COPY", "There is no text above the tag.")
         return
     if copy_to_clipboard(above):
-        ui_window.show("COPY", f"✅ הועתק ל-Clipboard:\n\n{above[:POPUP_CLIPBOARD_PREVIEW_LENGTH]}")
+        ui_window.show(
+            "COPY",
+            f"Copied to Clipboard:\n\n{above[:POPUP_CLIPBOARD_PREVIEW_LENGTH]}"
+        )
     else:
-        ui_window.show("ERROR", "שגיאה בהעתקה ל-Clipboard")
+        ui_window.show("ERROR", "Failed to copy to Clipboard")
 
 
 def handle_copy(content: str, full_text: str):
     if not content:
-        ui_window.show("COPY", "⚠️ כתבי את הטקסט בתוך התגית: @@COPY: הטקסט@@")
+        ui_window.show("COPY", "Write the text inside the tag: @@COPY: text@@")
         return
     if copy_to_clipboard(content):
-        ui_window.show("COPY", f"✅ הועתק ל-Clipboard:\n\n{content[:POPUP_CLIPBOARD_PREVIEW_LENGTH]}")
+        ui_window.show(
+            "COPY",
+            f"Copied to Clipboard:\n\n{content[:POPUP_CLIPBOARD_PREVIEW_LENGTH]}"
+        )
     else:
-        ui_window.show("ERROR", "שגיאה בהעתקה ל-Clipboard")
+        ui_window.show("ERROR", "Failed to copy to Clipboard")
 
 
 def handle_clipboard(content: str, full_text: str):
-    """Show the current clipboard contents in the console."""
+    """Show the current clipboard contents in the SEB Bot popup."""
     clipboard_text = get_clipboard_text()
 
     if clipboard_text:
-        print("[Agent] Current clipboard contents:")
-        print("========================================")
-        print(clipboard_text)
-        print("========================================")
+        ui_window.show(
+            "CLIPBOARD",
+            clipboard_text[:POPUP_CLIPBOARD_PREVIEW_LENGTH]
+        )
     else:
-        print("[Agent] Clipboard is empty.")
+        ui_window.show(
+            "CLIPBOARD",
+            "Clipboard is empty."
+        )
 
 
 def handle_paste(content: str, full_text: str):
@@ -163,7 +175,12 @@ def handle_fix(content: str, full_text: str):
         context = _truncate(context, FIX_CONTEXT_LIMIT)
 
     if not content and not context:
-        ui_window.show("ERROR", "⚠️ כתבי הוראה בתוך התגית:\n@@FIX: תאר את הבעיה@@\n\nהקוד שרוצה לתקן צריך להיות מעל התגית.")
+        ui_window.show(
+            "ERROR",
+            "Write an instruction inside the tag:\n"
+            "@@FIX: Describe the problem@@\n\n"
+            "The code to fix should be above the tag."
+        )
         return
 
     _call_ai_and_deliver("FIX", content, context)
@@ -171,25 +188,36 @@ def handle_fix(content: str, full_text: str):
 
 def handle_ask(content: str, full_text: str):
     if not content:
-        ui_window.show("ERROR", "⚠️ התגית ריקה. דוגמה:\n@@ASK: מה ההבדל בין list ל-tuple?@@")
+        ui_window.show(
+            "ERROR",
+            "The tag is empty. Example:\n"
+            "@@ASK: What is the difference between a list and a tuple?@@"
+        )
         return
     _call_ai_and_deliver("ASK", content, "")
 
 
 def handle_solve(content: str, full_text: str):
     if not content:
-        ui_window.show("ERROR", "⚠️ התגית ריקה. דוגמה:\n@@SOLVE: כתוב פונקציה שמחשבת עצרת@@")
+        ui_window.show(
+            "ERROR",
+            "The tag is empty. Example:\n"
+            "@@SOLVE: Write a function that calculates a factorial@@"
+        )
         return
     _call_ai_and_deliver("SOLVE", content, "")
 
 
 def _call_ai_and_deliver(tag_type: str, content: str, context: str):
-    print("[Agent] שולח ל-AI...")
+    print("[Agent] Sending to AI...")
     try:
         response = ask_ai(tag_type, content, context)
-        print(f"[Agent] תשובה התקבלה ({len(response)} תווים)")
+        print(f"[Agent] Response received ({len(response)} characters)")
     except Exception as e:
-        ui_window.show("ERROR", f"שגיאה בתקשורת עם AI:\n\n{_format_error(e)}")
+        ui_window.show(
+            "ERROR",
+            f"AI communication error:\n\n{_format_error(e)}"
+        )
         print(f"[Agent] AI error: {e}")
         return
 
