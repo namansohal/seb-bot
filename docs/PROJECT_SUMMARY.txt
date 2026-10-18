@@ -1,138 +1,286 @@
 =====================================
-   SEB Bot — סיכום פרויקט
-   עדכון אחרון: יולי 2026
+   SEB Bot — Project Summary
+   Last updated: October 2026
 =====================================
 
-מה הפרויקט:
-סוכן AI שרץ ברקע על מחשב Windows ומאפשר
-לתקשר עם AI מתוך דפדפן  (Safe Exam Browser — SEB),
+PROJECT OVERVIEW:
 
-פלטפורמת הלמידה: Ultracode (ultracode.co.il)
-עורך קוד: Monaco editor בתוך Chrome
+An AI assistant that runs in the background on Windows and
+provides AI interaction, clipboard operations, screenshot
+capture, and persistent Gemini chat functionality.
 
-=====================================
- ארכיטקטורה טכנית
-=====================================
-
-קריאת טקסט:
-  Windows UIAutomation API — קורא טקסט ישירות מהחלון הפעיל.
-  לא נחסם ע"י SEB כי הוא API של מערכת ההפעלה.
-  לא משתמש ב-screenshot ולא ב-OCR — מהיר וקל.
-  עובד עם Monaco editor של Ultracode.
-
-זיהוי תגיות:
-  Regex: @@TAGNAME: content@@ או @@TAGNAME@@
-  Debounce 1.5 שניות — שולח רק כשהתלמידה סיימה להקליד.
-  Hash — מונע שליחה כפולה של אותה תגית.
-  הסוכן מתעלם מחלון ה-Terminal שלו עצמו.
-
-מודל AI:
-  תמיכה במספר ספקי AI — הבחירה אוטומטית לפי פורמט ה-API key:
-    Google Gemini  — מפתח מתחיל ב-AQ. או AIzaSy — https://aistudio.google.com/apikey
-    Groq           — מפתח מתחיל ב-gsk_          — https://console.groq.com/keys
-    Mistral        — כל מפתח אחר                — https://console.mistral.ai/api-keys
-  Retry אוטומטי x3 על שגיאות 429 (rate limit).
-  חיסכון בטוקנים: system prompts קצרים, max_tokens מוגבל.
-
-תגובה:
-  חלון tkinter always-on-top עם התשובה.
-  כפתור "כתוב בעורך" — מקליד לתוך עורך הקוד (עוקף חסימת הדבקה).
-  כפתור "העתק" — שם ב-Clipboard.
+Learning platform: Ultracode (ultracode.co.il)
+Code editor: Monaco editor inside Chrome
 
 =====================================
- תגיות זמינות
+          TECHNICAL ARCHITECTURE
 =====================================
 
-@@ASK: שאלה@@        — שאלה טכנית קצרה (הסבר בלי קוד)
-@@ASKALL: שאלה@@     — שאלה על הקוד שמעל התגית
-@@SOLVE: משימה@@     — בקשת קוד לפי תיאור
-@@SOLVEALL@@         — פיתרון כל התרגיל לפי מה שבשדה
-@@FIX: הוראה@@       — תיקון הקוד שמעל התגית
-@@COPY: טקסט@@       — שים טקסט ספציפי ב-Clipboard
-@@COPYABOVE@@        — שים את הטקסט שמעל ב-Clipboard  [חוזר כל פעם]
-@@COPYALL@@          — שים את כל תוכן השדה ב-Clipboard  [חוזר כל פעם]
-@@SCREENSHOT@@       — צלם מסך ושמור לקובץ PNG בתיקיית seb_agent  [חוזר כל פעם]
+Text Reading:
+  Windows UIAutomation API reads text directly from the
+  active window.
+
+  The project does not use screenshots or OCR for normal
+  text extraction.
+
+  Works with the Monaco editor used by Ultracode.
+
+Tag Detection:
+  Regex detects:
+    @@TAGNAME: content@@
+    @@TAGNAME@@
+
+  Debounce prevents processing while the user is still typing.
+  Hash-based deduplication prevents the same tag from being
+  processed repeatedly.
+
+  The agent ignores its own terminal window.
+
+AI Provider:
+  Multiple AI providers are supported:
+
+    Google Gemini
+    Groq
+    Mistral
+
+  The provider can be selected automatically based on the
+  configured API key or explicitly selected in settings.json.
+
+  Automatic retry is used for rate-limit errors.
+
+Response:
+  tkinter is used for the response window.
+
+  Responses can be copied or sent to the editor through the
+  available input functionality.
+
+Gemini Chat:
+  The project supports persistent Gemini conversations.
+
+  Screenshot-aware chat is also supported:
+    @@SSTOCHAT@@ starts a Gemini chat with a screenshot
+    @@SSTOSS@@ adds another screenshot to the active chat
+
+  Multiple screenshots can therefore be added to the same
+  screenshot-aware conversation.
 
 =====================================
- קבצי הפרויקט
+            AVAILABLE TAGS
 =====================================
 
-main.py             — לולאה ראשית, debounce, dispatch לתגיות
-config.py           — טעינת + validation של settings.json
-constants.py        — כל הקבועים (timeouts, limits, וכו')
-reader.py           — קריאת טקסט מ-UIAutomation
-detector.py         — זיהוי תגיות, hash למניעת כפילויות
-ai_provider.py      — Gemini / Groq / Mistral, retry, token efficiency
-tag_handlers.py     — handler נפרד לכל סוג תגית
-ui_window.py        — חלון תשובה (tkinter, always-on-top)
-keyboard_input.py   — הקלדה אוטומטית לתוך עורך הקוד
-clipboard_utils.py  — פונקציית Clipboard משותפת
-settings.json       — API key + הגדרות (לא עולה ל-GitHub)
-settings.example.json — תבנית להעתקה
-scripts/install.bat — התקנת dependencies (פעם אחת)
-scripts/start.bat   — הרצת הסוכן
-.gitignore          — מונע העלאת settings.json ותמונות ל-GitHub
-docs/TAGS_GUIDE.txt      — מדריך שימוש בתגיות
-docs/PROJECT_SUMMARY.txt — קובץ זה
+@@ASK: question@@
+  Short technical question.
 
-חשוב: settings.json לא עולה ל-GitHub (מכיל API key).
-כל מחשב של תלמידה צריך settings.json משלה עם ה-API key.
+@@ASKALL: question@@
+  Question about the code above the tag.
 
-=====================================
- הגדרות (settings.json)
-=====================================
+@@SOLVE: task@@
+  Requests code based on a task description.
 
-api_key        — API key (Gemini / Groq / Mistral)
-provider       — "" (זיהוי אוטומטי לפי צורת המפתח) | "gemini" | "groq" | "mistral"
-model          — תלוי בספק (למשל gemini-2.0-flash-lite)
-poll_interval  — נבדק ב-validation אך לא נצרך בפועל כרגע —
-                 קצב הבדיקה בלולאה קבוע ב-constants.py (0.3 שניות)
-response_mode  — "auto" = חלון קופץ | "type" = כתיבה ישירה לעורך
-type_speed     — מהירות הקלדה אוטומטית (0.015 שניות לתו)
+@@SOLVEALL@@
+  Processes the complete exercise using the field content.
 
-=====================================
- שימוש יומיומי
-=====================================
+@@FIX: instruction@@
+  Requests changes or corrections to the code above the tag.
 
-לפני הבחינה (על מחשב כל תלמידה):
-  1. install.bat — פעם אחת בלבד (מתקין)
-  2. הכנסת API key ב-settings.json
-  3. start.bat — לפני פתיחת SEB
+@@COPY: text@@
+  Places specific text into the Clipboard.
 
-במהלך הבחינה:
-  - start.bat רץ ברקע, SEB פתוח רגיל
-  - התלמידה כותבת תגית בעורך הקוד
-  - מחכה 2 שניות
-  - חלון תשובה מופיע
+@@COPYABOVE@@
+  Places the text above the tag into the Clipboard.
+
+@@COPYALL@@
+  Places the complete field content into the Clipboard.
+
+@@CLIPBOARD@@
+  Uses the current Clipboard content.
+
+@@PASTE@@
+  Inserts Clipboard content through the input mechanism.
+
+@@CHAT@@
+  Opens a persistent Gemini chat.
+
+@@SCREENSHOT@@
+  Takes and saves a screenshot.
+
+@@SSTOCHAT@@
+  Takes a screenshot and opens a Gemini chat with the
+  screenshot as visual context.
+
+@@SSTOSS@@
+  Takes another screenshot and adds it to the currently
+  active screenshot-aware Gemini chat.
 
 =====================================
- אזהרות חשובות לשימוש
+             PROJECT FILES
 =====================================
 
-- אל תפתחי קבצי טקסט (TAGS_GUIDE.txt וכד') בזמן הבחינה —
-  הסוכן עלול לקרוא את ה-@@ שבהם ולהתבלבל
-- אל תעלי את settings.json ל-GitHub — הוא מכיל API key פרטי
-  (מוגן ע"י .gitignore)
-- אם תגית לא עובדת: לוודא שיש @@ בסוף ולחכות 2 שניות
-- אם SEB פתוח במצב kiosk מלא וחלון לא מופיע:
-  לשנות response_mode ל-"type" ב-settings.json
+main.py
+  Main loop, tag detection, debounce, and dispatch.
+
+config.py
+  Loading and validation of settings.json.
+
+constants.py
+  Application constants and timing values.
+
+reader.py
+  Text reading through UIAutomation.
+
+detector.py
+  Tag detection and deduplication.
+
+ai_provider.py
+  AI provider abstraction for Gemini, Groq, and Mistral.
+  Also manages Gemini chat functionality and screenshot
+  context.
+
+tag_handlers.py
+  Individual handler for each supported tag.
+
+ui_window.py
+  Response window and persistent chat interface.
+
+keyboard_input.py
+  Keyboard/input functionality.
+
+clipboard_utils.py
+  Shared Clipboard functionality.
+
+settings.json
+  Local configuration and API key.
+  This file is excluded from Git.
+
+settings.example.json
+  Example configuration template.
+
+scripts/install.bat
+  Installs project dependencies.
+
+scripts/start.bat
+  Starts the agent.
+
+.gitignore
+  Prevents local configuration and generated files from
+  being committed.
+
+docs/HOW_IT_WORKS.html
+  Detailed technical walkthrough.
+
+docs/TAGS_GUIDE.txt
+  User-facing tag documentation.
+
+docs/PROJECT_SUMMARY.txt
+  This project overview.
+
+docs/shortcut.txt
+  Existing shortcut reference.
 
 =====================================
- בעיות ידועות ופתרונות
+             SETTINGS
 =====================================
 
-SSL error (google-generativeai הישן):
-  פתרון: השתמש ב-google-genai (REST) — כבר מוטמע.
-  אם עדיין קורה: הרץ install.bat שוב.
+api_key
+  API key for the selected AI provider.
+
+provider
+  ""        = automatic provider detection
+  "gemini"  = Google Gemini
+  "groq"    = Groq
+  "mistral" = Mistral
+
+model
+  Model used by the selected provider.
+
+poll_interval
+  Configurable polling setting validated by the application.
+
+response_mode
+  "auto" = display the response in the response window
+  "type" = send the response through the typing mechanism
+
+type_speed
+  Controls the typing speed when the typing mode is used.
+
+=====================================
+             DAILY USAGE
+=====================================
+
+Before using the project:
+
+  1. Run install.bat once to install dependencies.
+  2. Configure the API key in settings.json.
+  3. Start the agent using start.bat.
+
+During use:
+
+  - The agent runs in the background.
+  - Enter one of the supported tags in the editor.
+  - Wait for the tag to be detected and processed.
+  - Use the resulting response, Clipboard action,
+    screenshot, or chat depending on the tag.
+
+For screenshot-aware Gemini chat:
+
+  1. Use @@SSTOCHAT@@ to start the chat with a screenshot.
+  2. Use @@SSTOSS@@ whenever another screenshot needs to be
+     added to the same active chat.
+
+=====================================
+          IMPORTANT NOTES
+=====================================
+
+- Keep settings.json private because it contains an API key.
+- Do not commit settings.json to Git.
+- Use the tag format exactly as documented.
+- Tags that require closing @@ must include the closing @@.
+- SSTOSS requires an active screenshot-aware Gemini chat.
+- SSTOCHAT and SSTOSS are currently implemented specifically
+  for the Gemini screenshot-chat workflow.
+
+=====================================
+        KNOWN ISSUES / HANDLING
+=====================================
+
+SSL errors:
+  The project uses the current Google Gemini integration.
+  If dependencies are missing or outdated, run install.bat again.
 
 429 Too Many Requests:
-  פתרון: retry אוטומטי x3 עם המתנה 15 שניות — מוטמע.
+  The AI provider layer handles rate-limit retries.
 
-הסוכן קורא את ה-Terminal שלו עצמו:
-  פתרון: רשימת חלונות מתעלמים — מוטמע.
+Agent reading its own terminal:
+  The project contains logic to ignore its own terminal window.
 
-חלון קופץ נחסם ע"י SEB (kiosk מלא):
-  פתרון: שנה response_mode ל-"type" ב-settings.json
+Tag not detected:
+  Check the tag spelling and closing @@ where required.
+  Then allow the detection/debounce period to complete.
 
-תגית לא מזוהה:
-  לבדוק: האם יש @@ סגירה? האם חיכית 2 שניות?
+=====================================
+             ARCHITECTURE
+=====================================
+
+The project follows a modular design:
+
+  main.py
+      |
+      +-- reader.py
+      |
+      +-- detector.py
+      |
+      +-- tag_handlers.py
+              |
+              +-- ai_provider.py
+              |
+              +-- clipboard_utils.py
+              |
+              +-- keyboard_input.py
+              |
+              +-- ui_window.py
+
+Each module has a specific responsibility so that tag
+detection, AI communication, input handling, Clipboard
+operations, and UI functionality remain separated.
+
+=====================================

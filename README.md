@@ -1,6 +1,6 @@
 # SEB Bot — AI Assistant for Safe Exam Browser
 
-A background agent that helps students work efficiently within Safe Exam Browser (SEB) environments by providing AI-powered code assistance, clipboard management, and other productivity features.
+A background agent that helps students work efficiently within Safe Exam Browser (SEB) environments by providing AI-powered code assistance, clipboard management, screenshots, and other productivity features.
 
 ## Problem
 
@@ -13,12 +13,14 @@ This makes working on coding tasks unnecessarily difficult.
 
 ## Solution
 
-SEB Bot runs as a background Windows process and uses **Windows UIAutomation** (which SEB cannot block) to:
+SEB Bot runs as a background Windows process and uses **Windows UIAutomation** to:
 - Read your code directly from the editor
 - Detect special tags (`@@ASK:`, `@@SOLVE:`, etc.)
 - Send requests to an AI provider (Gemini, Groq, or Mistral)
 - Return answers in a floating window
 - Handle clipboard operations directly from the OS level
+- Support persistent Gemini chats
+- Send screenshots to Gemini as visual context
 
 ## Features
 
@@ -33,57 +35,86 @@ SEB Bot runs as a background Windows process and uses **Windows UIAutomation** (
 | `@@SCREENSHOT@@` | Take a screenshot | — |
 | `@@ASKALL: question@@` | Ask about code above | `@@ASKALL: Why isn't this working?@@` |
 | `@@SOLVEALL@@` | Solve entire exercise | — |
+| `@@CLIPBOARD@@` | Use clipboard content | `@@CLIPBOARD@@` |
+| `@@PASTE@@` | Paste clipboard content | `@@PASTE@@` |
+| `@@CHAT@@` | Open a persistent Gemini chat | `@@CHAT@@` |
+| `@@SSTOCHAT@@` | Start Gemini chat with a screenshot | `@@SSTOCHAT@@` |
+| `@@SSTOSS@@` | Add another screenshot to current chat | `@@SSTOSS@@` |
 
 ## Technologies Used
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | Language | **Python 3.8+** | Core implementation |
-| UI reading | **Windows UIAutomation** (`uiautomation`) | Reads editor text at the OS accessibility level — invisible to SEB |
-| AI providers | **Google Gemini**, **Groq**, **Mistral AI** | Pluggable LLM backends, auto-selected by API key format |
+| UI reading | **Windows UIAutomation** (`uiautomation`) | Reads editor text |
+| AI providers | **Google Gemini**, **Groq**, **Mistral AI** | AI backends |
 | Response UI | **tkinter** | Always-on-top floating response window |
-| Clipboard | **pyperclip** | OS-level clipboard access (bypasses SEB's copy/paste block) |
-| Keyboard simulation | **keyboard** / **pyautogui** | Types AI responses directly into the editor |
-| Screenshots | **Pillow** + **pyautogui** | OS-level screen capture |
-| HTTP (Mistral) | **requests** | Direct REST calls to the Mistral API |
-| Config | **JSON** | Human-editable settings file, validated at startup |
+| Clipboard | **pyperclip** | Clipboard operations |
+| Keyboard simulation | **keyboard** / **pyautogui** | Keyboard input |
+| Screenshots | **Pillow** + **pyautogui** | Screen capture |
+| HTTP (Mistral) | **requests** | Mistral API requests |
+| Config | **JSON** | Application configuration |
 
 ## Installation
 
 ### Prerequisites
+
 - Python 3.8+
-- Windows (uses UIAutomation API)
+- Windows
 - An API key from one of:
-  - [Google Gemini](https://aistudio.google.com/apikey) — free tier available
-  - [Groq](https://console.groq.com/keys) — free tier available
+  - [Google Gemini](https://aistudio.google.com/apikey)
+  - [Groq](https://console.groq.com/keys)
   - [Mistral AI](https://console.mistral.ai/api-keys)
 
 ### Setup
 
 1. **Clone or download** this repository
-2. **Run installation** (one time):
+2. **Run installation**:
    ```bash
    scripts\install.bat
    ```
 3. **Configure API key**:
    - Copy `settings.example.json` to `settings.json`
-   - Add your API key to `settings.json` — the provider is auto-detected from the key format
-4. **Start the bot** (before opening SEB):
+   - Add your API key to `settings.json`
+4. **Start the bot**:
    ```bash
    scripts\start.bat
    ```
 
 ## Usage
 
-1. Open Safe Exam Browser
-2. In your code editor, type a tag: `@@ASK: Your question here@@`
-3. Wait 1-2 seconds for the bot to detect the tag
-4. A window appears with the AI's response
-5. Use the "Copy" or "Type in editor" buttons
+Type a supported tag in the editor.
+
+Example:
+
+```text
+@@ASK: How does binary search work?@@
+```
+
+For a persistent Gemini chat:
+
+```text
+@@CHAT@@
+```
+
+To start a Gemini chat with a screenshot:
+
+```text
+@@SSTOCHAT@@
+```
+
+To add another screenshot to the same chat:
+
+```text
+@@SSTOSS@@
+```
+
+`@@SSTOSS@@` adds the new screenshot to the currently active screenshot-aware Gemini chat.
 
 ## Configuration
 
 Edit `settings.json`:
+
 ```json
 {
   "api_key": "your-key-here",
@@ -96,99 +127,127 @@ Edit `settings.json`:
 }
 ```
 
-- **provider**: `""` (auto-detect from key format), `"gemini"`, `"groq"`, or `"mistral"`
+- **provider**: `""` (auto-detect), `"gemini"`, `"groq"`, or `"mistral"`
 - **response_mode**: `"auto"` (pop-up window) or `"type"` (direct typing)
-- **type_speed**: Delay between characters when typing (in seconds)
+- **type_speed**: Delay between characters when typing
 - **language**: `"he"` (Hebrew) or `"en"` (English)
 
-Settings are validated at startup — invalid values (e.g. an unknown `response_mode`) raise a clear error instead of failing silently.
+Settings are validated at startup.
 
 ## How It Works
 
-```
+```text
 1. You type @@TAG: content@@
       ↓
-2. Main loop reads focused window (0.3s intervals)
+2. Main loop reads the focused window
       ↓
-3. Detector regex finds tags + hash-based deduplication
+3. Detector finds the tag
       ↓
-4. Debounce waits 1.5s for user to finish typing
+4. Debounce waits for typing to finish
       ↓
-5. AI request sent to the configured provider
+5. The appropriate handler is executed
       ↓
-6. Response appears in floating window
+6. AI request is sent when required
       ↓
-7. You can copy or type directly into editor
+7. Response appears in the floating window
 ```
 
-**Key Technical Points:**
-- Uses **Windows UIAutomation** (accessibility API) — SEB cannot block it
-- **No screenshots/OCR** for reading — direct text extraction from controls
-- **No clipboard spoofing** — operates at OS level
-- **Debouncing** — prevents sending incomplete tags to AI
-- **Hash-based deduplication** — avoids duplicate requests
-- **Provider-agnostic AI layer** — swap Gemini/Groq/Mistral without touching the rest of the code
+For screenshot-aware Gemini chat:
+
+```text
+@@SSTOCHAT@@
+      ↓
+Screenshot is captured
+      ↓
+Gemini chat is opened
+      ↓
+Screenshot is added as visual context
+```
+
+Then:
+
+```text
+@@SSTOSS@@
+```
+
+captures another screenshot and adds it to the existing chat.
+
+## Key Technical Points
+
+- Uses **Windows UIAutomation** for reading editor content
+- Uses **regex** for tag detection
+- Uses **debouncing** to prevent incomplete requests
+- Uses **hash-based deduplication** to avoid duplicate requests
+- Supports **repeatable tags**
+- Supports multiple AI providers
+- Supports persistent Gemini conversations
+- Supports multiple screenshots in screenshot-aware Gemini chats
 
 ## Architecture
 
-```
-main.py             — Main loop: debouncing, tag detection, dispatch
-config.py           — Settings loading + validation
-constants.py        — All tunable values (timeouts, limits, sizes)
-reader.py           — Text reading via UIAutomation
-detector.py         — Tag detection & hash-based deduplication
-ai_provider.py       — AI provider abstraction (Gemini / Groq / Mistral)
-tag_handlers.py      — One handler function per tag type
-ui_window.py         — Floating response window (tkinter)
-keyboard_input.py    — Automated typing into the editor
-clipboard_utils.py   — Shared clipboard read/write logic
+```text
+main.py              — Main loop, debouncing, tag detection, dispatch
+config.py            — Settings loading + validation
+constants.py         — Application constants
+reader.py            — Text reading via UIAutomation
+detector.py          — Tag detection + deduplication
+ai_provider.py       — Gemini / Groq / Mistral
+tag_handlers.py      — Tag handlers
+ui_window.py         — Response and chat windows
+keyboard_input.py    — Automated typing
+clipboard_utils.py   — Clipboard operations
 
-settings.json         — Local config with API key (gitignored)
-settings.example.json — Template to copy
+settings.json         — Local configuration
+settings.example.json — Configuration template
 
 scripts/
 ├── install.bat      — One-time dependency installation
-└── start.bat        — Run before each exam session
+└── start.bat        — Start the bot
 
 docs/
-├── HOW_IT_WORKS.html   — Detailed technical walkthrough
+├── HOW_IT_WORKS.html   — Technical walkthrough
 ├── TAGS_GUIDE.txt      — Tag reference
-└── PROJECT_SUMMARY.txt — Project overview
+├── PROJECT_SUMMARY.txt — Project overview
+└── shortcut.txt        — Shortcut reference
 ```
 
-Each module has a single responsibility: `reader.py` only reads text, `detector.py` only recognizes tags, `ai_provider.py` only talks to LLMs, `tag_handlers.py` only decides what each tag does, and `main.py` just wires them together in a loop. No file imports something that (directly or indirectly) imports it back.
+Each module has a single responsibility: `reader.py` reads text, `detector.py` recognizes tags, `ai_provider.py` communicates with LLMs, `tag_handlers.py` handles tag actions, and `main.py` connects everything together.
 
 ## Security & Privacy
 
-⚠️ **Important:**
-- `settings.json` is **NOT** pushed to GitHub (protected by `.gitignore`)
+Important:
+- `settings.json` is not pushed to GitHub
 - Never share your API key
-- Never commit `settings.json` to version control
-- API calls go to your chosen provider (check their respective privacy policies)
+- Never commit `settings.json`
+- API requests are sent to the selected AI provider
+- Check the privacy policy of your selected provider
 
 ## Troubleshooting
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| "Missing API key" | `settings.json` not configured | Get a free key from Gemini or Groq |
-| Missing dependency error at startup | A required package isn't installed | Run `scripts\install.bat` again |
-| Tag not detected | Missing closing `@@` | Always use `@@TAG: content@@` format |
-| No response | Waited less than 1.5 seconds | Wait for debounce timeout |
-| 429 Too Many Requests | Exceeded rate limit | Bot retries automatically (15s wait, up to 3 times) |
-| Window blocked | SEB in full kiosk mode | Change `response_mode` to `"type"` |
+| "Missing API key" | `settings.json` not configured | Add your API key |
+| Missing dependency | Package not installed | Run `scripts\install.bat` |
+| Tag not detected | Invalid tag format | Check the `@@TAG@@` format |
+| No response | Tag is still being processed | Wait briefly |
+| 429 Too Many Requests | Provider rate limit | The bot retries automatically |
+| `SSTOCHAT` not working | Gemini is not selected | Select the Gemini provider |
+| `SSTOSS` not working | No active screenshot chat | Start with `@@SSTOCHAT@@` |
 
 ## Development
 
 To contribute or modify:
-1. Clone the repo
-2. Install dependencies: `pip install -r requirements.txt`
-3. Modify the relevant module (see Architecture above)
-4. Test with a running SEB session
+
+1. Clone the repository
+2. Install dependencies:
+   `pip install -r requirements.txt`
+3. Modify the relevant module
+4. Test the changes
 5. Submit a pull request
 
-To add a new tag: write a handler function in `tag_handlers.py` and register it in the `HANDLERS` dict — no changes needed elsewhere.
+To add a new tag, create a handler in `tag_handlers.py` and register it in the `HANDLERS` dictionary.
 
-To add a new AI provider: add a class in `ai_provider.py` implementing `AIProvider.generate()`, and register it in `get_provider()`.
+To add a new AI provider, add its implementation in `ai_provider.py` and register it with the provider selection logic.
 
 ## License
 
@@ -196,10 +255,10 @@ MIT License — See [LICENSE](LICENSE) file
 
 ## Disclaimer
 
-This tool is designed for **educational purposes** with restricted browser environments. Users are responsible for ensuring compliance with their institution's policies and SEB usage agreements.
+This tool is designed for educational purposes with restricted browser environments. Users are responsible for ensuring compliance with their institution's policies and SEB usage agreements.
 
 ---
 
-**Made with ❤️ for students tired of browser restrictions.**
+Made with ❤️ for students tired of browser restrictions.
 
 Questions? Open an issue on GitHub.

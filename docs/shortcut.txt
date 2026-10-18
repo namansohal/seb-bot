@@ -12,3 +12,5 @@
 | `@@SCREENSHOT@@` | `@SS@` |
 | `@@ASKALL@@` | `@AA@` |
 | `@@SOLVEALL@@` | `@SA@` |
+
+//maybe file, not implemented yet

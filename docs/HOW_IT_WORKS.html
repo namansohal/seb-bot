@@ -3,1825 +3,1344 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SEB Bot — Project Documentation</title>
+<title>SEB Bot — How It Works</title>
+
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+
+:root {
+  --ink: #13110c;
+  --panel: #1b1811;
+  --panel2: #232017;
+  --paper: #ded3b4;
+  --paper-ink: #1a1712;
+  --paper-mut: #6b5f48;
+  --tan: #b7a98a;
+  --txt: #e8e2d2;
+  --muted: #8f856b;
+  --red: #c0291f;
+  --green: #4f7a43;
+  --line: rgba(183,169,138,.18);
+  --serif: "DM Serif Display", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #0f1117;
-  color: #cdd6f4;
-  line-height: 1.75;
-  padding: 40px 20px 80px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--ink);
+  color: var(--txt);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
 }
 
-.container {
-  max-width: 980px;
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(90vmax 70vmax at 50% -10%, rgba(192,41,31,.08), transparent 55%),
+    radial-gradient(130vmax 130vmax at 50% 45%, #1a1710 0%, var(--ink) 55%, #0c0a06 100%);
+}
+
+#app {
+  width: 100%;
+  max-width: 1050px;
   margin: 0 auto;
+  padding: max(24px, env(safe-area-inset-top))
+           max(20px, env(safe-area-inset-right))
+           50px
+           max(20px, env(safe-area-inset-left));
 }
 
-.toc {
-  background: #1e1e2e;
-  border: 1px solid #313244;
-  border-radius: 12px;
-  padding: 20px 28px;
-  margin-bottom: 48px;
-}
-
-.toc h3 {
-  color: #cba6f7;
-  margin-bottom: 12px;
-  font-size: 1rem;
-}
-
-.toc ol {
-  padding-left: 20px;
-}
-
-.toc li {
-  margin: 4px 0;
-}
-
-.toc a {
-  color: #89b4fa;
+a {
+  color: var(--tan);
   text-decoration: none;
-  font-size: 0.88rem;
 }
 
-.toc a:hover {
-  text-decoration: underline;
+a:hover {
+  color: var(--paper);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: .3px;
 }
 
 h1 {
-  font-size: 2rem;
-  color: #cba6f7;
-  border-bottom: 2px solid #313244;
-  padding-bottom: 14px;
-  margin-bottom: 6px;
-}
-
-.subtitle {
-  color: #6c7086;
-  margin-bottom: 40px;
-  font-size: 0.9rem;
+  font-size: clamp(42px, 8vw, 72px);
+  color: var(--paper);
+  line-height: 1;
 }
 
 h2 {
-  font-size: 1.2rem;
-  color: #89b4fa;
-  margin: 52px 0 18px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #313244;
-  scroll-margin-top: 20px;
-}
-
-h2 .num {
-  background: #313244;
-  color: #cba6f7;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.78rem;
-  margin-right: 10px;
+  font-size: 29px;
+  color: var(--paper);
+  margin-bottom: 18px;
 }
 
 h3 {
-  color: #a6e3a1;
-  margin: 28px 0 10px;
-  font-size: 0.98rem;
+  font-size: 21px;
+  color: var(--tan);
+  margin: 25px 0 10px;
 }
 
 p {
-  margin-bottom: 12px;
-  color: #bac2de;
-  font-size: 0.88rem;
+  color: #c6bda8;
+  margin-bottom: 13px;
 }
 
 ul,
 ol {
-  padding-left: 22px;
-  margin-bottom: 14px;
+  padding-left: 23px;
+  margin-bottom: 15px;
 }
 
 li {
-  color: #bac2de;
-  font-size: 0.86rem;
-  margin: 5px 0;
+  color: #c6bda8;
+  margin: 6px 0;
 }
 
 strong {
-  color: #cdd6f4;
-}
-
-pre {
-  background: #181825;
-  border: 1px solid #313244;
-  border-radius: 8px;
-  padding: 16px 18px;
-  overflow-x: auto;
-  margin: 14px 0;
-  font-family: 'Consolas', 'Courier New', monospace;
-  font-size: 0.79rem;
-  line-height: 1.65;
-  direction: ltr;
-  text-align: left;
+  color: var(--txt);
 }
 
 code {
-  font-family: 'Consolas', monospace;
-  background: #181825;
-  border: 1px solid #313244;
-  padding: 1px 5px;
+  font-family: var(--mono);
+  color: var(--paper);
+  background: rgba(0,0,0,.25);
+  border: 1px solid var(--line);
   border-radius: 4px;
-  font-size: 0.81rem;
-  color: #f9e2af;
+  padding: 2px 6px;
+  font-size: .88em;
 }
 
-.kw  { color: #cba6f7; }
-.fn  { color: #89b4fa; }
-.str { color: #a6e3a1; }
-.cm  { color: #45475a; font-style: italic; }
-.num { color: #fab387; }
-.cls { color: #f38ba8; }
-
-.code-block {
-  margin: 16px 0;
+pre {
+  overflow-x: auto;
+  white-space: pre;
+  background: #100e09;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--tan);
+  border-radius: 6px;
+  padding: 17px;
+  margin: 14px 0 20px;
+  color: #d7ccb1;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
 }
 
-.code-file {
+::selection {
+  background: var(--red);
+  color: #fff;
+}
+
+/* Header */
+
+.hero {
+  padding: 28px 0 38px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-top {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #313244;
-  padding: 7px 14px;
-  border-radius: 8px 8px 0 0;
-  border: 1px solid #45475a;
-  border-bottom: none;
-  font-family: 'Consolas', monospace;
-  font-size: 0.79rem;
-  color: #f9e2af;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
-.code-file span {
-  color: #6c7086;
-  font-size: 0.74rem;
-}
-
-.code-block pre {
-  border-radius: 0 0 8px 8px;
-  margin: 0;
-}
-
-.note {
-  background: #2a2a3e;
-  border-left: 3px solid #cba6f7;
-  padding: 10px 14px;
-  margin: 10px 0;
-  border-radius: 6px 0 0 6px;
-  font-size: 0.81rem;
-  color: #bac2de;
-}
-
-.flow {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  margin: 24px 0;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.flow-box {
-  background: #1e1e2e;
-  border: 1px solid #313244;
-  border-radius: 10px;
-  padding: 14px 12px;
-  text-align: center;
-  min-width: 115px;
-  flex: 1;
-}
-
-.flow-box .icon {
-  font-size: 1.6rem;
-  display: block;
-  margin-bottom: 5px;
-}
-
-.flow-box .label {
-  font-size: 0.8rem;
-  color: #cba6f7;
-  font-weight: bold;
-}
-
-.flow-box .desc {
-  font-size: 0.7rem;
-  color: #6c7086;
-  margin-top: 3px;
-}
-
-.flow-arrow {
-  font-size: 1.4rem;
-  color: #45475a;
-  padding: 0 3px;
-  align-self: center;
-  flex-shrink: 0;
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
-  margin: 18px 0;
-}
-
-.card {
-  background: #1e1e2e;
-  border: 1px solid #313244;
-  border-radius: 10px;
-  padding: 14px;
-  border-left: 3px solid var(--ac, #cba6f7);
-}
-
-.card .fname {
-  font-family: 'Consolas', monospace;
-  color: #f9e2af;
-  font-size: 0.86rem;
-  margin-bottom: 3px;
-}
-
-.card .role {
-  color: var(--ac, #cba6f7);
-  font-size: 0.76rem;
-  margin-bottom: 7px;
-  font-weight: bold;
-}
-
-.card p {
-  font-size: 0.78rem;
-  color: #6c7086;
-  margin: 0;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 16px 0;
-  font-size: 0.82rem;
-}
-
-th {
-  background: #313244;
-  color: #cba6f7;
-  padding: 9px 13px;
-  text-align: left;
-  font-weight: 600;
-}
-
-td {
-  padding: 8px 13px;
-  border-bottom: 1px solid #1e1e2e;
-  color: #bac2de;
-  vertical-align: top;
-}
-
-tr:hover td {
-  background: #1e1e2e;
-}
-
-td:first-child {
-  font-family: 'Consolas', monospace;
-  color: #f9e2af;
-  white-space: nowrap;
-  font-size: 0.77rem;
+.logo {
+  font-family: var(--serif);
+  font-size: 30px;
+  color: var(--paper);
+  letter-spacing: 2px;
 }
 
 .badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 0.69rem;
-  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,.2);
+  color: var(--tan);
+  padding: 7px 11px;
+  border-radius: 4px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
 }
 
-.b-ai  {
-  background: #1e1e4e;
-  color: #89b4fa;
+.hero-sub {
+  max-width: 720px;
+  color: var(--tan);
+  margin-top: 17px;
+  font-size: 13px;
+  line-height: 1.8;
 }
 
-.b-no {
-  background: #1e2e1e;
-  color: #a6e3a1;
+/* Navigation */
+
+.toc {
+  margin: 24px 0 35px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.3);
 }
 
-.b-sys {
-  background: #2e1e1e;
-  color: #f38ba8;
+.toc-title {
+  color: var(--tan);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 13px;
 }
 
-.steps {
+.toc-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 24px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-list li {
+  margin: 0;
+}
+
+.toc-list a {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 5px 0;
+  transition: color .15s, transform .15s;
+}
+
+.toc-list a:hover {
+  color: var(--paper);
+  transform: translateX(3px);
+}
+
+/* Sections */
+
+.section {
+  margin-top: 42px;
+  scroll-margin-top: 20px;
+}
+
+.section-head {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 18px;
+}
+
+.number {
+  width: 29px;
+  height: 29px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.3);
+}
+
+.panel + .panel {
+  margin-top: 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: rgba(0,0,0,.18);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.card-title {
+  color: var(--paper);
+  font-family: var(--serif);
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.card p {
+  font-size: 12px;
+  margin: 0;
+}
+
+.path {
+  display: inline-block;
+  color: var(--paper);
+  background: rgba(0,0,0,.25);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 3px 7px;
+  font-size: 11px;
+}
+
+/* File structure */
+
+.tree {
+  color: #cfc5ad;
+}
+
+.tree .dir {
+  color: var(--tan);
+}
+
+.tree .file {
+  color: #d8d0bd;
+}
+
+.tree .note {
+  color: var(--muted);
+}
+
+/* Tags */
+
+.tag-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.tag-table th,
+.tag-table td {
+  text-align: left;
+  padding: 12px 11px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.tag-table th {
+  color: var(--tan);
+  font-size: 10px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  background: rgba(0,0,0,.18);
+}
+
+.tag-table td {
+  color: #c6bda8;
+  font-size: 12px;
+}
+
+.tag-table tr:last-child td {
+  border-bottom: none;
+}
+
+.tag-table code {
+  white-space: nowrap;
+  color: var(--paper);
+}
+
+.tag-special td:first-child code {
+  border-color: rgba(192,41,31,.4);
+}
+
+/* Flow */
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin: 18px 0;
 }
 
-.step {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  background: #1e1e2e;
-  border-radius: 10px;
-  padding: 14px;
+.flow-box {
+  min-width: 135px;
+  text-align: center;
+  padding: 13px 12px;
+  background: rgba(0,0,0,.2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--tan);
+  font-size: 11px;
 }
 
-.step-num {
-  background: #cba6f7;
-  color: #1e1e2e;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 0.82rem;
-  flex-shrink: 0;
-  margin-top: 2px;
+.flow-box.primary {
+  border-color: rgba(192,41,31,.5);
+  color: #e5a39d;
 }
 
-.step-content h4 {
-  color: #cdd6f4;
-  margin: 0 0 3px;
-  font-size: 0.88rem;
+.arrow {
+  color: var(--muted);
 }
 
-.step-content p {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #6c7086;
+/* Callouts */
+
+.callout {
+  border-radius: 5px;
+  padding: 13px 15px;
+  margin: 14px 0;
+  border: 1px solid;
+  font-size: 12px;
 }
 
-.alert {
-  background: #2a1e1e;
-  border: 1px solid #f38ba8;
-  border-radius: 8px;
-  padding: 11px 15px;
-  margin: 12px 0;
-  font-size: 0.83rem;
-  color: #f38ba8;
+.callout.info {
+  background: rgba(183,169,138,.07);
+  border-color: rgba(183,169,138,.25);
+  color: var(--tan);
 }
 
-.tip {
-  background: #1e2a1e;
-  border: 1px solid #a6e3a1;
-  border-radius: 8px;
-  padding: 11px 15px;
-  margin: 12px 0;
-  font-size: 0.83rem;
-  color: #a6e3a1;
+.callout.good {
+  background: rgba(79,122,67,.1);
+  border-color: rgba(79,122,67,.35);
+  color: #91b586;
 }
 
-.info {
-  background: #1e1e2a;
-  border: 1px solid #89b4fa;
-  border-radius: 8px;
-  padding: 11px 15px;
-  margin: 12px 0;
-  font-size: 0.83rem;
-  color: #89b4fa;
+.callout.warn {
+  background: rgba(192,152,41,.08);
+  border-color: rgba(192,152,41,.3);
+  color: #d6b25c;
 }
 
-hr {
-  border: none;
-  border-top: 1px solid #1e1e2e;
-  margin: 32px 0;
+.callout.bad {
+  background: rgba(192,41,31,.08);
+  border-color: rgba(192,41,31,.3);
+  color: #df8179;
 }
 
-details {
-  background: #181825;
-  border: 1px solid #313244;
-  border-radius: 8px;
-  margin: 12px 0;
+/* Footer */
+
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 45px 0 10px;
 }
 
-summary {
-  padding: 10px 15px;
-  cursor: pointer;
-  color: #89b4fa;
-  font-family: 'Consolas', monospace;
-  font-size: 0.83rem;
-  user-select: none;
-  list-style: none;
+.footer .line {
+  width: 70px;
+  height: 1px;
+  background: var(--line);
+  margin: 0 auto 14px;
 }
 
-summary::-webkit-details-marker {
-  display: none;
+/* Responsive */
+
+@media (hover: hover) and (pointer: fine) {
+  .card {
+    transition: transform .14s ease, border-color .15s, box-shadow .2s;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(183,169,138,.32);
+    box-shadow: 0 14px 30px rgba(0,0,0,.3);
+  }
 }
 
-summary::before {
-  content: "▶  ";
-  color: #45475a;
+@media (max-width: 700px) {
+  #app {
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+
+  .toc-list,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-top {
+    align-items: flex-start;
+  }
+
+  h2 {
+    font-size: 25px;
+  }
+
+  .tag-table {
+    display: block;
+    overflow-x: auto;
+    white-space: normal;
+  }
+
+  .tag-table th,
+  .tag-table td {
+    min-width: 145px;
+  }
+
+  .tag-table th:first-child,
+  .tag-table td:first-child {
+    min-width: 170px;
+  }
+
+  .flow {
+    flex-direction: column;
+  }
+
+  .flow-box {
+    width: 100%;
+  }
+
+  .arrow {
+    transform: rotate(90deg);
+  }
 }
 
-details[open] summary::before {
-  content: "▼  ";
-}
+@media (max-width: 420px) {
+  body {
+    font-size: 13px;
+  }
 
-summary:hover {
-  background: #1e1e2e;
-  border-radius: 8px;
-}
+  #app {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
 
-details pre {
-  border: none;
-  border-radius: 0 0 8px 8px;
-  margin: 0;
-}
+  .hero {
+    padding-top: 18px;
+  }
 
-.back {
-  display: inline-block;
-  margin-top: 40px;
-  color: #45475a;
-  font-size: 0.8rem;
-  text-decoration: none;
-}
+  .hero-top {
+    margin-bottom: 19px;
+  }
 
-.back:hover {
-  color: #89b4fa;
+  .logo {
+    font-size: 26px;
+  }
+
+  .badge {
+    font-size: 9px;
+    padding: 6px 8px;
+  }
+
+  .panel {
+    padding: 17px;
+  }
+
+  pre {
+    font-size: 11px;
+    padding: 13px;
+  }
+
+  .section {
+    margin-top: 34px;
+  }
 }
 </style>
 </head>
 
 <body>
-<div class="container">
-
-<h1>SEB Bot — Complete Project Documentation</h1>
-<p class="subtitle">
-  Project architecture, files, handlers, configuration, AI providers, clipboard utilities, keyboard input, and execution flow.
-</p>
-
-<div class="toc">
-  <h3>Table of Contents</h3>
-  <ol>
-    <li><a href="#s1">What the Project Does</a></li>
-    <li><a href="#s2">Project Structure</a></li>
-    <li><a href="#s3">scripts/install.bat — Installation</a></li>
-    <li><a href="#s4">scripts/start.bat — Launching the Application</a></li>
-    <li><a href="#s5">settings.json + config.py</a></li>
-    <li><a href="#s6">reader.py — Reading Focused Text</a></li>
-    <li><a href="#s7">detector.py — Tag Detection</a></li>
-    <li><a href="#s8">main.py — Main Loop and Debounce</a></li>
-    <li><a href="#s9">ai_provider.py — AI Provider Layer</a></li>
-    <li><a href="#s10">tag_handlers.py — Tag Handlers</a></li>
-    <li><a href="#s11">ui_window.py — Response and Chat UI</a></li>
-    <li><a href="#s12">keyboard_input.py — Keyboard Automation</a></li>
-    <li><a href="#s13">clipboard_utils.py — Clipboard Utilities</a></li>
-    <li><a href="#s14">Complete Tag Reference</a></li>
-    <li><a href="#s15">End-to-End Example</a></li>
-    <li><a href="#s16">Common Problems and Notes</a></li>
-  </ol>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 1 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s1"><span class="num">1</span> What the Project Does</h2>
-
-<p>
-  <strong>SEB Bot</strong> is a Windows-based Python automation tool that watches the currently focused
-  text environment for specially formatted commands called <strong>tags</strong>.
-</p>
-
-<p>
-  A tag starts and ends with <code>@@</code>. Once a complete tag has remained stable for the configured
-  debounce period, the application identifies it and dispatches it to the appropriate handler.
-</p>
-
-<ul>
-  <li>Reads focused text through Windows UI Automation.</li>
-  <li>Detects supported <code>@@TAG@@</code> commands.</li>
-  <li>Prevents accidental duplicate processing.</li>
-  <li>Sends AI requests through a provider abstraction.</li>
-  <li>Displays AI responses in a desktop UI.</li>
-  <li>Provides a persistent Gemini chat window through <code>@@CHAT@@</code>.</li>
-  <li>Provides clipboard copy, clipboard inspection, and paste-related keyboard actions.</li>
-  <li>Can capture screenshots as local PNG files.</li>
-</ul>
-
-<div class="flow">
-  <div class="flow-box">
-    <span class="icon">⌨️</span>
-    <div class="label">User Input</div>
-    <div class="desc">Writes @@TAG@@</div>
-  </div>
-
-  <div class="flow-arrow">→</div>
-
-  <div class="flow-box">
-    <span class="icon">👁️</span>
-    <div class="label">reader.py</div>
-    <div class="desc">UI Automation</div>
-  </div>
-
-  <div class="flow-arrow">→</div>
-
-  <div class="flow-box">
-    <span class="icon">🔍</span>
-    <div class="label">detector.py</div>
-    <div class="desc">Regex + state</div>
-  </div>
-
-  <div class="flow-arrow">→</div>
-
-  <div class="flow-box">
-    <span class="icon">⏱️</span>
-    <div class="label">main.py</div>
-    <div class="desc">Debounce</div>
-  </div>
-
-  <div class="flow-arrow">→</div>
-
-  <div class="flow-box">
-    <span class="icon">🧩</span>
-    <div class="label">tag_handlers.py</div>
-    <div class="desc">Dispatch</div>
-  </div>
-
-  <div class="flow-arrow">→</div>
-
-  <div class="flow-box">
-    <span class="icon">🤖</span>
-    <div class="label">AI Provider</div>
-    <div class="desc">Gemini / Groq / Mistral</div>
-  </div>
-
-  <div class="flow-arrow">→</div>
-
-  <div class="flow-box">
-    <span class="icon">💬</span>
-    <div class="label">ui_window.py</div>
-    <div class="desc">Desktop UI</div>
-  </div>
-</div>
-
-<div class="note">
-  <strong>Architecture principle:</strong>
-  the main loop is responsible for detecting and dispatching work, while individual modules
-  handle reading, AI communication, UI, keyboard input, and clipboard operations.
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 2 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s2"><span class="num">2</span> Project Structure</h2>
-
-<div class="cards">
-
-  <div class="card" style="--ac:#89b4fa">
-    <div class="fname">main.py</div>
-    <div class="role">Main Loop</div>
-    <p>Startup checks, polling, debounce logic, duplicate handling, and dispatch.</p>
-  </div>
-
-  <div class="card" style="--ac:#cba6f7">
-    <div class="fname">config.py</div>
-    <div class="role">Configuration</div>
-    <p>Loads settings.json, merges defaults, and validates configuration.</p>
-  </div>
-
-  <div class="card" style="--ac:#6c7086">
-    <div class="fname">constants.py</div>
-    <div class="role">Constants</div>
-    <p>Central location for polling, debounce, limits, delays, and UI constants.</p>
-  </div>
-
-  <div class="card" style="--ac:#89b4fa">
-    <div class="fname">reader.py</div>
-    <div class="role">Text Reader</div>
-    <p>Reads focused Windows UI elements and searches their parent/tree hierarchy.</p>
-  </div>
-
-  <div class="card" style="--ac:#89b4fa">
-    <div class="fname">detector.py</div>
-    <div class="role">Tag Detection</div>
-    <p>Recognizes supported tags and prevents duplicate processing.</p>
-  </div>
-
-  <div class="card" style="--ac:#a6e3a1">
-    <div class="fname">ai_provider.py</div>
-    <div class="role">AI Layer</div>
-    <p>Provider selection, Gemini, Groq, Mistral, retries, and persistent chat creation.</p>
-  </div>
-
-  <div class="card" style="--ac:#f9e2af">
-    <div class="fname">tag_handlers.py</div>
-    <div class="role">Handlers</div>
-    <p>One handler function for each supported tag.</p>
-  </div>
-
-  <div class="card" style="--ac:#fab387">
-    <div class="fname">ui_window.py</div>
-    <div class="role">Desktop UI</div>
-    <p>Response popups and the interactive Gemini chat window.</p>
-  </div>
-
-  <div class="card" style="--ac:#fab387">
-    <div class="fname">keyboard_input.py</div>
-    <div class="role">Keyboard Input</div>
-    <p>Windows keyboard simulation and automated text/paste actions.</p>
-  </div>
-
-  <div class="card" style="--ac:#f38ba8">
-    <div class="fname">clipboard_utils.py</div>
-    <div class="role">Clipboard</div>
-    <p>Centralized clipboard copy and clipboard reading functionality.</p>
-  </div>
-
-  <div class="card" style="--ac:#6c7086">
-    <div class="fname">settings.json</div>
-    <div class="role">Local Configuration</div>
-    <p>Personal API key and runtime configuration. Excluded from Git.</p>
-  </div>
-
-  <div class="card" style="--ac:#89b4fa">
-    <div class="fname">settings.example.json</div>
-    <div class="role">Configuration Template</div>
-    <p>Safe example configuration that can be committed to the repository.</p>
-  </div>
-
-</div>
-
-<p style="margin-top:16px"><strong>Additional directories:</strong></p>
-
-<ul>
-  <li><code>scripts/</code> — installation and startup batch files.</li>
-  <li><code>docs/</code> — project documentation and tag references.</li>
-</ul>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 3 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s3"><span class="num">3</span> scripts/install.bat — Installation</h2>
-
-<p>
-  Run the installation script when setting up the project on a new machine or when dependencies need
-  to be installed again.
-</p>
-
-<div class="code-block">
-  <div class="code-file">scripts/install.bat</div>
-
-<pre>@echo off
-chcp 65001 &gt;nul
-
-echo ============================================
-echo  SEB Bot - Installing / Updating packages
-echo ============================================
-echo.
-
-cd /d "%~dp0.."
-
-pip install -r requirements.txt
-
-echo.
-echo  Installation complete.
-echo  Run scripts\start.bat to launch the application.
-
-pause</pre>
-</div>
-
-<p><strong>Main dependencies:</strong></p>
-
-<pre>google-genai&gt;=1.0.0
-groq&gt;=0.9.0
-requests&gt;=2.31.0
-uiautomation&gt;=2.0.18
-pyautogui&gt;=0.9.54
-keyboard&gt;=0.13.5
-pyperclip&gt;=1.9.0
-Pillow&gt;=10.0.0</pre>
-
-<ul>
-  <li><code>google-genai</code> — Gemini API.</li>
-  <li><code>groq</code> — Groq API.</li>
-  <li><code>requests</code> — HTTP requests used by REST-based providers.</li>
-  <li><code>uiautomation</code> — Windows UI Automation.</li>
-  <li><code>pyautogui</code> — screenshot and input utilities.</li>
-  <li><code>keyboard</code> — keyboard input.</li>
-  <li><code>pyperclip</code> — clipboard access.</li>
-  <li><code>Pillow</code> — image handling.</li>
-</ul>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 4 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s4"><span class="num">4</span> scripts/start.bat — Launching the Application</h2>
-
-<p>
-  The startup script changes the working directory to the project root and launches
-  <code>main.py</code>.
-</p>
-
-<div class="code-block">
-  <div class="code-file">scripts/start.bat</div>
-
-<pre>@echo off
-chcp 65001 &gt;nul
-
-echo Starting SEB Bot...
-
-cd /d "%~dp0.."
-
-python main.py
-
-pause</pre>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 5 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s5"><span class="num">5</span> settings.json + config.py</h2>
-
-<p>
-  <code>settings.json</code> contains local configuration. It should remain local because it can
-  contain an API key.
-</p>
-
-<div class="alert">
-  Never commit a real API key to GitHub. The project's <code>.gitignore</code> should exclude
-  <code>settings.json</code>.
-</div>
-
-<pre>{
-  <span class="str">"api_key"</span>: <span class="str">"YOUR_GOOGLE_GEMINI_API_KEY_HERE"</span>,
-  <span class="str">"provider"</span>: <span class="str">""</span>,
-  <span class="str">"poll_interval"</span>: <span class="num">1.0</span>,
-  <span class="str">"response_mode"</span>: <span class="str">"auto"</span>,
-  <span class="str">"model"</span>: <span class="str">"gemini-3.5"</span>,
-  <span class="str">"type_speed"</span>: <span class="num">0.015</span>,
-  <span class="str">"language"</span>: <span class="str">"he"</span>
+<div class="bg"></div>
+
+<div id="app">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="logo">SEB BOT</div>
+      <div class="badge">Project Documentation</div>
+    </div>
+
+    <h1>How It Works</h1>
+
+    <p class="hero-sub">
+      A technical guide to the SEB Bot architecture, tag system, AI integration,
+      screenshot-aware Gemini chat, automation flow, and supporting utilities.
+    </p>
+  </header>
+
+  <nav class="toc">
+    <div class="toc-title">Contents</div>
+
+    <ol class="toc-list">
+      <li><a href="#what">01 — What the Project Does</a></li>
+      <li><a href="#structure">02 — Project Structure</a></li>
+      <li><a href="#install">03 — Installation</a></li>
+      <li><a href="#launch">04 — Launching the Application</a></li>
+      <li><a href="#config">05 — Configuration</a></li>
+      <li><a href="#reader">06 — Reading Focused Text</a></li>
+      <li><a href="#detector">07 — Tag Detection</a></li>
+      <li><a href="#main">08 — Main Loop and Debounce</a></li>
+      <li><a href="#provider">09 — AI Provider Layer</a></li>
+      <li><a href="#handlers">10 — Tag Handlers</a></li>
+      <li><a href="#ui">11 — Response and Chat UI</a></li>
+      <li><a href="#keyboard">12 — Keyboard Automation</a></li>
+      <li><a href="#clipboard">13 — Clipboard Utilities</a></li>
+      <li><a href="#tags">14 — Complete Tag Reference</a></li>
+      <li><a href="#example">15 — End-to-End Examples</a></li>
+      <li><a href="#notes">16 — Common Problems and Notes</a></li>
+    </ol>
+  </nav>
+
+  <section class="section" id="what">
+    <div class="section-head">
+      <span class="number">01</span>
+      <h2>What the Project Does</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        SEB Bot is a Windows automation utility built around special tags written
+        in focused text. The application continuously reads the active text
+        context, detects supported tags, and performs the corresponding action.
+      </p>
+
+      <p>
+        Depending on the tag, the action can involve text manipulation,
+        clipboard operations, keyboard automation, an AI request, a screenshot,
+        or a Gemini chat session.
+      </p>
+
+      <div class="flow">
+        <div class="flow-box">Focused Text</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Reader</div>
+        <span class="arrow">→</span>
+        <div class="flow-box primary">Detector</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Tag Handler</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Result / Action</div>
+      </div>
+
+      <div class="callout info">
+        The tag system is the main interface between the user and the application.
+        Tags are intentionally short and can be embedded directly in supported text.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="structure">
+    <div class="section-head">
+      <span class="number">02</span>
+      <h2>Project Structure</h2>
+    </div>
+
+    <div class="panel">
+<pre class="tree">seb-ai-agent-main/
+├── ai_provider.py
+├── clipboard_utils.py
+├── config.py
+├── constants.py
+├── detector.py
+├── keyboard_input.py
+├── main.py
+├── reader.py
+├── tag_handlers.py
+├── ui_window.py
+├── settings.json
+├── settings.example.json
+├── requirements.txt
+├── README.md
+│
+├── docs/
+│   ├── HOW_IT_WORKS.html
+│   ├── PROJECT_SUMMARY.txt
+│   ├── TAGS_GUIDE.txt
+│   └── shortcut.txt
+│
+└── scripts/
+    ├── install.bat
+    └── start.bat</pre>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">main.py</div>
+          <p>Application entry point, polling loop, tag processing and debounce logic.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">reader.py</div>
+          <p>Reads the currently focused text or supported active context.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">detector.py</div>
+          <p>Recognizes supported tags and prevents unwanted repeated execution.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">tag_handlers.py</div>
+          <p>Connects detected tags to their individual actions.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">ai_provider.py</div>
+          <p>Provides the AI and Gemini chat integration.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">ui_window.py</div>
+          <p>Displays responses and manages Gemini chat windows.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">keyboard_input.py</div>
+          <p>Handles keyboard automation used by supported actions.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">clipboard_utils.py</div>
+          <p>Provides clipboard read/write helpers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="install">
+    <div class="section-head">
+      <span class="number">03</span>
+      <h2>scripts/install.bat — Installation</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        The installation script prepares the Python environment and installs the
+        packages listed in <code>requirements.txt</code>.
+      </p>
+
+      <p>
+        The intended setup path is to run the supplied
+        <span class="path">scripts/install.bat</span> rather than manually
+        installing individual dependencies.
+      </p>
+
+      <div class="callout info">
+        Run installation once after obtaining the project, or again after dependency
+        requirements have changed.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="launch">
+    <div class="section-head">
+      <span class="number">04</span>
+      <h2>scripts/start.bat — Launching the Application</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        The start script launches the application's Python entry point.
+        Keeping the launch command in a batch file makes starting the project
+        consistent without manually typing the Python command each time.
+      </p>
+
+      <p>
+        The application then enters its main processing loop and waits for
+        supported tags.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="config">
+    <div class="section-head">
+      <span class="number">05</span>
+      <h2>settings.json + config.py</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        Runtime configuration is stored in <code>settings.json</code>.
+        The configuration layer reads those values and makes them available to
+        the rest of the application.
+      </p>
+
+      <h3>Typical configuration responsibilities</h3>
+
+      <ul>
+        <li>AI provider configuration.</li>
+        <li>API credentials or provider-specific settings.</li>
+        <li>Model selection.</li>
+        <li>Application behavior controlled through configuration values.</li>
+      </ul>
+
+      <div class="callout warn">
+        Keep private credentials inside the local configuration file and do not
+        commit secrets to the repository.
+      </div>
+
+      <p>
+        <code>settings.example.json</code> provides a template for creating the
+        local settings file.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="reader">
+    <div class="section-head">
+      <span class="number">06</span>
+      <h2>reader.py — Reading Focused Text</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        The reader layer is responsible for obtaining the text that the
+        application should inspect.
+      </p>
+
+      <p>
+        This keeps text acquisition separate from tag detection. The detector
+        does not need to know how the text was obtained; it receives text and
+        determines whether a supported tag is present.
+      </p>
+
+      <div class="flow">
+        <div class="flow-box">Active Context</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">reader.py</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Text</div>
+        <span class="arrow">→</span>
+        <div class="flow-box primary">detector.py</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="detector">
+    <div class="section-head">
+      <span class="number">07</span>
+      <h2>detector.py — Tag Detection</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        The detector maintains the list of recognized tags and determines whether
+        a tag should be processed.
+      </p>
+
+      <p>
+        It also handles repeatability rules. Some tags are designed to be used
+        repeatedly, while ordinary tags are protected from being triggered
+        continuously by the same unchanged input.
+      </p>
+
+<pre>KNOWN_TAGS = {
+    "ASK",
+    "SOLVE",
+    "FIX",
+    "COPY",
+    "COPYABOVE",
+    "COPYALL",
+    "SCREENSHOT",
+    "ASKALL",
+    "SOLVEALL",
+    "PASTE",
+    "CHAT",
+    "CLIPBOARD",
+    "SSTOCHAT",
+    "SSTOSS",
 }</pre>
 
-<p><strong>Configuration fields:</strong></p>
-
-<table>
-  <tr>
-    <th>Field</th>
-    <th>Purpose</th>
-  </tr>
-  <tr>
-    <td>api_key</td>
-    <td>API key used by the selected provider.</td>
-  </tr>
-  <tr>
-    <td>provider</td>
-    <td>Explicit provider selection. An empty value enables automatic detection.</td>
-  </tr>
-  <tr>
-    <td>poll_interval</td>
-    <td>Polling interval used by the main loop.</td>
-  </tr>
-  <tr>
-    <td>response_mode</td>
-    <td><code>auto</code> displays a popup; <code>type</code> sends the response through keyboard input.</td>
-  </tr>
-  <tr>
-    <td>model</td>
-    <td>Model name passed to the selected AI provider.</td>
-  </tr>
-  <tr>
-    <td>type_speed</td>
-    <td>Delay between simulated typed characters.</td>
-  </tr>
-  <tr>
-    <td>language</td>
-    <td>Language preference used by the project configuration.</td>
-  </tr>
-</table>
-
-<div class="code-block">
-  <div class="code-file">config.py</div>
-
-<pre><span class="kw">import</span> json
-<span class="kw">from</span> pathlib <span class="kw">import</span> Path
-
-_SETTINGS_FILE = Path(__file__).parent / <span class="str">"settings.json"</span>
-
-_DEFAULTS = {
-    <span class="str">"api_key"</span>: <span class="str">""</span>,
-    <span class="str">"provider"</span>: <span class="str">""</span>,
-    <span class="str">"poll_interval"</span>: <span class="num">1.0</span>,
-    <span class="str">"response_mode"</span>: <span class="str">"auto"</span>,
-    <span class="str">"model"</span>: <span class="str">"gemini-3.5"</span>,
-    <span class="str">"type_speed"</span>: <span class="num">0.015</span>,
-    <span class="str">"language"</span>: <span class="str">"he"</span>,
-}
-
-VALID_RESPONSE_MODES = (<span class="str">"auto"</span>, <span class="str">"type"</span>)
-VALID_PROVIDERS = (<span class="str">""</span>, <span class="str">"gemini"</span>, <span class="str">"groq"</span>, <span class="str">"mistral"</span>)
-
-<span class="kw">class</span> <span class="cls">ConfigError</span>(Exception):
-    <span class="str">"""Raised when settings.json contains invalid configuration."""</span>
-    <span class="kw">pass</span>
-
-<span class="kw">def</span> <span class="fn">_validate</span>(settings: dict) -&gt; dict:
-    <span class="kw">if</span> settings[<span class="str">"response_mode"</span>] <span class="kw">not in</span> VALID_RESPONSE_MODES:
-        <span class="kw">raise</span> <span class="cls">ConfigError</span>(
-            f<span class="str">"response_mode must be one of {VALID_RESPONSE_MODES}"</span>
-        )
-
-    <span class="kw">if</span> settings[<span class="str">"provider"</span>] <span class="kw">not in</span> VALID_PROVIDERS:
-        <span class="kw">raise</span> <span class="cls">ConfigError</span>(
-            f<span class="str">"provider must be one of {VALID_PROVIDERS}"</span>
-        )
-
-    <span class="kw">if</span> settings[<span class="str">"poll_interval"</span>] &lt;= <span class="num">0</span>:
-        <span class="kw">raise</span> <span class="cls">ConfigError</span>(
-            <span class="str">"poll_interval must be greater than 0"</span>
-        )
-
-    <span class="kw">if</span> settings[<span class="str">"type_speed"</span>] &lt; <span class="num">0</span>:
-        <span class="kw">raise</span> <span class="cls">ConfigError</span>(
-            <span class="str">"type_speed must be non-negative"</span>
-        )
-
-    <span class="kw">return</span> settings</pre>
-</div>
-
-<div class="note">
-  Configuration validation ensures that invalid values are detected during startup instead of
-  silently falling back to unexpected behavior.
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 6 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s6"><span class="num">6</span> reader.py — Reading Focused Text</h2>
-
-<p>
-  <code>reader.py</code> is responsible for retrieving text from the currently focused Windows UI
-  element.
-</p>
-
-<p>
-  The reader first checks the focused control, then walks through parent controls when necessary,
-  and finally performs a broader tree search when configured to do so.
-</p>
-
-<div class="code-block">
-  <div class="code-file">reader.py — simplified flow</div>
-
-<pre><span class="kw">def</span> <span class="fn">read_focused_text</span>() -&gt; Optional[str]:
-    <span class="kw">try</span>:
-        <span class="kw">import</span> uiautomation <span class="kw">as</span> auto
-    <span class="kw">except</span> ImportError:
-        <span class="fn">print</span>(<span class="str">"[reader] uiautomation is not installed."</span>)
-        <span class="kw">return None</span>
-
-    fg = auto.<span class="fn">GetForegroundControl</span>()
-
-    <span class="kw">if</span> fg <span class="kw">and</span> <span class="fn">_should_ignore</span>(fg.Name):
-        <span class="kw">return None</span>
-
-    ctrl = auto.<span class="fn">GetFocusedControl</span>()
-
-    <span class="kw">if</span> ctrl:
-        value = <span class="fn">_extract</span>(ctrl)
-
-        <span class="kw">if</span> value:
-            <span class="kw">return</span> value
-
-        parent = ctrl.<span class="fn">GetParentControl</span>()
-
-        <span class="kw">for</span> _ <span class="kw">in</span> range(MAX_PARENT_WALK_UP):
-            <span class="kw">if</span> parent <span class="kw">is None</span>:
-                <span class="kw">break</span>
-
-            value = <span class="fn">_extract</span>(parent)
-
-            <span class="kw">if</span> value:
-                <span class="kw">return</span> value
-
-            parent = parent.<span class="fn">GetParentControl</span>()
-
-    <span class="kw">if</span> fg:
-        <span class="kw">return</span> <span class="fn">_search_tree</span>(fg, depth=<span class="num">0</span>)
-
-    <span class="kw">return None</span></pre>
-</div>
-
-<div class="note">
-  The reader is intentionally separated from tag detection. Its only responsibility is obtaining
-  text from the Windows UI hierarchy.
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 7 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s7"><span class="num">7</span> detector.py — Tag Detection</h2>
-
-<p>
-  <code>detector.py</code> recognizes commands using a regular expression and filters them against
-  the project's known tag list.
-</p>
-
-<div class="code-block">
-  <div class="code-file">detector.py — tag recognition</div>
-
-<pre>_TAG_RE = re.compile(
-    <span class="str">r'@@([A-Za-z]+)\s*:?\s*(.*?)@@'</span>,
-    re.DOTALL
-)
-
-KNOWN_TAGS = {
-    <span class="str">"ASK"</span>,
-    <span class="str">"SOLVE"</span>,
-    <span class="str">"FIX"</span>,
-    <span class="str">"COPY"</span>,
-    <span class="str">"PASTE"</span>,
-    <span class="str">"COPYALL"</span>,
-    <span class="str">"COPYABOVE"</span>,
-    <span class="str">"SCREENSHOT"</span>,
-    <span class="str">"SOLVEALL"</span>,
-    <span class="str">"ASKALL"</span>,
-    <span class="str">"CHAT"</span>,
-    <span class="str">"CLIPBOARD"</span>,
-}</pre>
-</div>
-
-<p>
-  <code>peek_tag()</code> returns the latest recognized tag without changing the processed state.
-</p>
-
-<div class="code-block">
-  <div class="code-file">detector.py — peek_tag()</div>
-
-<pre><span class="kw">def</span> <span class="fn">peek_tag</span>(text: str) -&gt; tuple[str, str] | None:
-    candidates = []
-
-    <span class="kw">for</span> match <span class="kw">in</span> _TAG_RE.<span class="fn">finditer</span>(text):
-        tag = match.<span class="fn">group</span>(<span class="num">1</span>).<span class="fn">upper</span>().<span class="fn">strip</span>()
-        content = match.<span class="fn">group</span>(<span class="num">2</span>).<span class="fn">strip</span>()
-
-        <span class="kw">if</span> tag <span class="kw">in</span> KNOWN_TAGS:
-            candidates.<span class="fn">append</span>(
-                (match.<span class="fn">start</span>(), tag, content)
-            )
-
-    <span class="kw">if not</span> candidates:
-        <span class="kw">return None</span>
-
-    _, tag_type, content = <span class="fn">max</span>(
-        candidates,
-        key=<span class="kw">lambda</span> item: item[<span class="num">0</span>]
-    )
-
-    <span class="kw">return</span> tag_type, content</pre>
-</div>
-
-<h3>Duplicate prevention</h3>
-
-<div class="code-block">
-  <div class="code-file">detector.py — processed state</div>
-
-<pre>_processed_hash: str | None = <span class="kw">None</span>
-
-<span class="kw">def</span> <span class="fn">_compute_hash</span>(tag_type: str, content: str) -&gt; str:
-    <span class="kw">return</span> hashlib.md5(
-        f<span class="str">"{tag_type}:{content}"</span>.encode()
-    ).hexdigest()
-
-<span class="kw">def</span> <span class="fn">is_new</span>(tag_type, content) -&gt; bool:
-    <span class="kw">return</span> <span class="fn">_compute_hash</span>(tag_type, content) != _processed_hash
-
-<span class="kw">def</span> <span class="fn">mark_processed</span>(tag_type, content):
-    <span class="kw">global</span> _processed_hash
-    _processed_hash = <span class="fn">_compute_hash</span>(tag_type, content)</pre>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 8 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s8"><span class="num">8</span> main.py — Main Loop and Debounce</h2>
-
-<p>
-  <code>main.py</code> is intentionally focused on application orchestration rather than implementing
-  the behavior of every tag itself.
-</p>
-
-<h3>Startup checks</h3>
-
-<div class="code-block">
-  <div class="code-file">main.py — startup validation</div>
-
-<pre><span class="kw">def</span> <span class="fn">_check_dependencies</span>():
-    missing = [
-        pip_name
-        <span class="kw">for</span> module_name, pip_name
-        <span class="kw">in</span> REQUIRED_PACKAGES.items()
-        <span class="kw">if not</span> <span class="fn">_can_import</span>(module_name)
-    ]
-
-    <span class="kw">if</span> missing:
-        <span class="fn">print</span>(<span class="str">"Missing required packages:"</span>)
-
-        <span class="kw">for</span> pkg <span class="kw">in</span> missing:
-            <span class="fn">print</span>(f<span class="str">"   pip install {pkg}"</span>)
-
-        sys.<span class="fn">exit</span>(<span class="num">1</span>)
-
-_check_dependencies()</pre>
-</div>
-
-<h3>Debounce</h3>
-
-<p>
-  The debounce mechanism prevents a tag from being processed while the user is still typing.
-  The application waits until the detected tag remains unchanged for the configured period.
-</p>
-
-<div class="code-block">
-  <div class="code-file">main.py — simplified debounce flow</div>
-
-<pre><span class="kw">while True</span>:
-    text = <span class="fn">read_focused_text</span>()
-
-    <span class="kw">if</span> text <span class="kw">and</span> <span class="str">"@@"</span> <span class="kw">in</span> text:
-        result = <span class="fn">peek_tag</span>(text)
-
-        <span class="kw">if</span> result:
-            tag_type, content = result
-            key = f<span class="str">"{tag_type}:{content}"</span>
-
-            <span class="kw">if</span> key != pending_key:
-                pending_key = key
-                pending_since = time.<span class="fn">time</span>()
-                pending_data = (tag_type, content, text)
-
-            <span class="kw">else</span>:
-                debounce = (
-                    DEBOUNCE_BARE
-                    <span class="kw">if not</span> content
-                    <span class="kw">else</span> DEBOUNCE_WITH_CONTENT
-                )
-
-                <span class="kw">if</span> time.<span class="fn">time</span>() - pending_since &gt;= debounce:
-                    <span class="fn">mark_processed</span>(
-                        tag_type,
-                        content
-                    )
-
-                    threading.<span class="cls">Thread</span>(
-                        target=_safe_dispatch,
-                        args=pending_data,
-                        daemon=<span class="kw">True</span>
-                    ).<span class="fn">start</span>()
-
-    time.<span class="fn">sleep</span>(MAIN_LOOP_POLL_INTERVAL)</pre>
-</div>
-
-<h3>Safe dispatch</h3>
-
-<div class="code-block">
-  <div class="code-file">main.py — _safe_dispatch()</div>
-
-<pre><span class="kw">def</span> <span class="fn">_safe_dispatch</span>(
-    tag_type: str,
-    content: str,
-    full_text: str
-):
-    <span class="kw">try</span>:
-        <span class="fn">dispatch</span>(
-            tag_type,
-            content,
-            full_text
-        )
-
-    <span class="kw">except</span> Exception <span class="kw">as</span> e:
-        <span class="fn">print</span>(
-            f<span class="str">"[Agent] Unhandled error: {e}"</span>
-        )
-
-        ui_window.<span class="fn">show</span>(
-            <span class="str">"ERROR"</span>,
-            f<span class="str">"Unexpected error:\n{e}"</span>
-        )</pre>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 9 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s9"><span class="num">9</span> ai_provider.py — AI Provider Layer</h2>
-
-<p>
-  <code>ai_provider.py</code> provides a common interface for supported AI services.
-  The application can use Gemini, Groq, or Mistral depending on configuration.
-</p>
-
-<h3>Provider selection</h3>
-
-<div class="code-block">
-  <div class="code-file">ai_provider.py — detect_provider()</div>
-
-<pre><span class="kw">def</span> <span class="fn">detect_provider</span>() -&gt; str:
-    explicit = Settings.<span class="fn">get</span>(
-        <span class="str">"provider"</span>,
-        <span class="str">""</span>
-    ).lower()
-
-    <span class="kw">if</span> explicit <span class="kw">in</span> (
-        <span class="str">"groq"</span>,
-        <span class="str">"gemini"</span>,
-        <span class="str">"mistral"</span>
-    ):
-        <span class="kw">return</span> explicit
-
-    key = Settings.<span class="fn">get</span>(
-        <span class="str">"api_key"</span>,
-        <span class="str">""</span>
-    )
-
-    <span class="kw">if</span> key.startswith(<span class="str">"gsk_"</span>):
-        <span class="kw">return</span> <span class="str">"groq"</span>
-
-    <span class="kw">if</span> key.startswith(
-        (<span class="str">"AIzaSy"</span>, <span class="str">"AQ."</span>)
-    ):
-        <span class="kw">return</span> <span class="str">"gemini"</span>
-
-    <span class="kw">return</span> <span class="str">"mistral"</span></pre>
-</div>
-
-<h3>Shared provider abstraction</h3>
-
-<div class="code-block">
-  <div class="code-file">ai_provider.py — AIProvider</div>
-
-<pre><span class="kw">class</span> <span class="cls">RateLimitError</span>(Exception):
-    <span class="str">"""Signals that the request should be retried."""</span>
-    <span class="kw">pass</span>
-
-
-<span class="kw">class</span> <span class="cls">AIProvider</span>(ABC):
-
-    <span class="kw">@abstractmethod</span>
-    <span class="kw">def</span> <span class="fn">_request</span>(
-        self,
-        tag_type: str,
-        user_msg: str
-    ):
-        <span class="str">"""Perform one provider-specific request."""</span>
-
-    <span class="kw">def</span> <span class="fn">generate</span>(
-        self,
-        tag_type: str,
-        user_msg: str
-    ) -&gt; str:
-
-        <span class="kw">for</span> attempt <span class="kw">in</span> range(
-            <span class="num">1</span>,
-            RETRY_ATTEMPTS + <span class="num">1</span>
-        ):
-            <span class="kw">try</span>:
-                <span class="kw">return</span> self.<span class="fn">_request</span>(
-                    tag_type,
-                    user_msg
-                )
-
-            <span class="kw">except</span> <span class="cls">RateLimitError</span>:
-                <span class="kw">if</span> attempt &lt; RETRY_ATTEMPTS:
-                    time.<span class="fn">sleep</span>(
-                        RETRY_WAIT_SECONDS
-                    )
-                <span class="kw">else</span>:
-                    <span class="kw">raise</span></pre>
-</div>
-
-<h3>Gemini chat sessions</h3>
-
-<p>
-  Normal AI tags use individual generation requests. The <code>@@CHAT@@</code> feature is different:
-  it creates a dedicated Gemini chat session so that messages within the chat can retain conversation
-  context.
-</p>
-
-<div class="code-block">
-  <div class="code-file">ai_provider.py — create_chat()</div>
-
-<pre><span class="kw">def</span> <span class="fn">create_chat</span>():
-    <span class="kw">if</span> <span class="fn">detect_provider</span>() != <span class="str">"gemini"</span>:
-        <span class="kw">raise</span> RuntimeError(
-            <span class="str">"CHAT requires Gemini as the configured provider."</span>
-        )
-
-    <span class="kw">from</span> google.genai <span class="kw">import</span> types
-
-    provider = <span class="fn">get_provider</span>()
-    client = provider._get_client()
-
-    model = Settings.<span class="fn">get</span>(
-        <span class="str">"model"</span>,
-        <span class="str">"gemini-3.5"</span>
-    )
-
-    system = (
-        <span class="str">"You are a helpful programming assistant. "</span>
-        <span class="str">"Answer questions clearly and directly. "</span>
-        <span class="str">"Maintain the context of the conversation."</span>
-    )
-
-    <span class="kw">return</span> client.chats.create(
-        model=model,
-        config=types.GenerateContentConfig(
-            system_instruction=system,
-            temperature=<span class="num">0.3</span>
-        )
-    )</pre>
-</div>
-
-<div class="note">
-  The dedicated chat session keeps the Gemini client alive for the duration of the chat instead of
-  creating a temporary client for every individual message.
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 10 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s10"><span class="num">10</span> tag_handlers.py — Tag Handlers</h2>
-
-<p>
-  Each supported command has its own handler. The central <code>HANDLERS</code> dictionary maps
-  the detected tag name to the corresponding function.
-</p>
-
-<div class="code-block">
-  <div class="code-file">tag_handlers.py — HANDLERS registry</div>
+      <div class="callout info">
+        The exact implementation in the source files remains the authoritative
+        behavior. This section describes the role of the detector rather than
+        duplicating every implementation detail.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="main">
+    <div class="section-head">
+      <span class="number">08</span>
+      <h2>main.py — Main Loop and Debounce</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        <code>main.py</code> coordinates the application. Its main responsibilities
+        include reading the current context, checking for tags, deciding whether
+        a tag is new, and dispatching it to the appropriate handler.
+      </p>
+
+      <div class="flow">
+        <div class="flow-box">Read</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Detect</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Check New</div>
+        <span class="arrow">→</span>
+        <div class="flow-box primary">Handle</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Update State</div>
+      </div>
+
+      <h3>Repeatable actions</h3>
+
+      <p>
+        Actions such as screenshots, copying, and chat-related commands can be
+        intentionally repeatable. This allows the same type of command to be
+        used again without requiring unrelated text changes.
+      </p>
+
+      <div class="callout good">
+        The repeatability logic is important for screenshot workflows because
+        multiple screenshots can be added during one active chat session.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="provider">
+    <div class="section-head">
+      <span class="number">09</span>
+      <h2>ai_provider.py — AI Provider Layer</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        The AI provider layer isolates AI communication from the rest of the
+        application. Tag handlers request an AI operation without needing to
+        implement provider-specific API details themselves.
+      </p>
+
+      <h3>Standard AI requests</h3>
+
+      <p>
+        Regular request tags can send text-based prompts to the configured AI
+        provider and return the resulting response to the UI.
+      </p>
+
+      <h3>Gemini chat</h3>
+
+      <p>
+        Gemini chat is persistent for the lifetime of the active chat session.
+        This allows multiple messages to share the same conversation context.
+      </p>
+
+      <h3>Screenshot-aware Gemini chat</h3>
+
+      <p>
+        The screenshot-aware workflow adds visual context to the conversation.
+        <code>@@SSTOCHAT@@</code> creates a chat using a newly captured screenshot
+        as initial visual context.
+      </p>
+
+      <p>
+        <code>@@SSTOSS@@</code> captures another screenshot and adds it to the
+        already-open screenshot-aware Gemini chat.
+      </p>
+
+      <div class="callout info">
+        Screenshots are treated as visual context for the AI conversation.
+        The chat response behavior remains text-based and uses plain formatting.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="handlers">
+    <div class="section-head">
+      <span class="number">10</span>
+      <h2>tag_handlers.py — Tag Handlers</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        Once a tag is detected, <code>tag_handlers.py</code> maps it to the
+        corresponding operation.
+      </p>
+
+      <p>
+        The handler layer is where individual commands are connected to the
+        reader, clipboard, keyboard, screenshot, AI, and UI functionality.
+      </p>
+
+      <h3>Screenshot chat handlers</h3>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">SSTOCHAT</div>
+          <p>
+            Captures a screenshot and opens a Gemini chat with that screenshot
+            supplied as the initial visual context.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">SSTOSS</div>
+          <p>
+            Captures another screenshot and sends it to the currently active
+            screenshot-aware Gemini chat.
+          </p>
+        </div>
+      </div>
+
+      <h3>Handler mapping</h3>
 
 <pre>HANDLERS = {
-    <span class="str">"SCREENSHOT"</span>: handle_screenshot,
-    <span class="str">"ASKALL"</span>:     handle_askall,
-    <span class="str">"SOLVEALL"</span>:   handle_solveall,
-    <span class="str">"COPYALL"</span>:    handle_copyall,
-    <span class="str">"COPYABOVE"</span>:  handle_copyabove,
-    <span class="str">"COPY"</span>:       handle_copy,
-    <span class="str">"CLIPBOARD"</span>:  handle_clipboard,
-    <span class="str">"FIX"</span>:        handle_fix,
-    <span class="str">"ASK"</span>:        handle_ask,
-    <span class="str">"SOLVE"</span>:      handle_solve,
-    <span class="str">"CHAT"</span>:       handle_chat,
-    <span class="str">"PASTE"</span>:      handle_paste,
+    "ASK": ...,
+    "SOLVE": ...,
+    "FIX": ...,
+    "COPY": ...,
+    "COPYABOVE": ...,
+    "COPYALL": ...,
+    "SCREENSHOT": ...,
+    "ASKALL": ...,
+    "SOLVEALL": ...,
+    "PASTE": ...,
+    "CHAT": ...,
+    "CLIPBOARD": ...,
+    "SSTOCHAT": ...,
+    "SSTOSS": ...,
 }</pre>
-</div>
 
-<h3>AI handlers</h3>
-
-<ul>
-  <li><code>handle_ask()</code> — sends a short question to the AI.</li>
-  <li><code>handle_solve()</code> — requests a complete solution.</li>
-  <li><code>handle_fix()</code> — sends an instruction together with preceding code context.</li>
-  <li><code>handle_askall()</code> — sends the code above the tag together with a question.</li>
-  <li><code>handle_solveall()</code> — sends the complete relevant field as the problem.</li>
-</ul>
-
-<h3>Utility handlers</h3>
-
-<ul>
-  <li><code>handle_copy()</code> — copies explicit tag content.</li>
-  <li><code>handle_copyabove()</code> — copies text preceding the tag.</li>
-  <li><code>handle_copyall()</code> — copies the complete detected field.</li>
-  <li><code>handle_clipboard()</code> — prints the current clipboard contents.</li>
-  <li><code>handle_paste()</code> — performs the configured keyboard paste sequence.</li>
-  <li><code>handle_screenshot()</code> — saves a screenshot as a PNG file.</li>
-  <li><code>handle_chat()</code> — opens the Gemini chat interface.</li>
-</ul>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 11 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s11"><span class="num">11</span> ui_window.py — Response and Chat UI</h2>
-
-<p>
-  <code>ui_window.py</code> contains the application's Tkinter-based user interface.
-</p>
-
-<h3>Response windows</h3>
-
-<div class="code-block">
-  <div class="code-file">ui_window.py — response window concept</div>
-
-<pre>root = tk.Tk()
-
-root.title(
-    f<span class="str">"SEB Bot · {tag_type}"</span>
-)
-
-root.attributes(
-    <span class="str">"-topmost"</span>,
-    <span class="kw">True</span>
-)
-
-root.geometry(
-    POPUP_GEOMETRY
-)</pre>
-</div>
-
-<p>
-  AI responses can be displayed in a popup. Depending on the tag and configuration, the UI can also
-  provide actions such as copying the response or sending it through the keyboard input module.
-</p>
-
-<h3>Gemini chat</h3>
-
-<p>
-  <code>show_chat()</code> opens a dedicated chat interface. Messages are sent to the persistent
-  Gemini chat session created by <code>create_chat()</code>.
-</p>
-
-<ul>
-  <li>Chat input field.</li>
-  <li>Send button.</li>
-  <li>Conversation display.</li>
-  <li>Ctrl+Enter support for sending.</li>
-  <li>Background request handling so the UI remains responsive.</li>
-</ul>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 12 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s12"><span class="num">12</span> keyboard_input.py — Keyboard Input</h2>
-
-<p>
-  <code>keyboard_input.py</code> centralizes simulated keyboard operations.
-</p>
-
-<h3>Typing text</h3>
-
-<div class="code-block">
-  <div class="code-file">keyboard_input.py — type_text()</div>
-
-<pre><span class="kw">def</span> <span class="fn">type_text</span>(text: str):
-    delay = Settings.<span class="fn">get</span>(
-        <span class="str">"type_speed"</span>,
-        <span class="num">0.015</span>
-    )
-
-    <span class="kw">try</span>:
-        <span class="kw">import</span> keyboard
-        keyboard.<span class="fn">write</span>(
-            text,
-            delay=delay
-        )
-        <span class="kw">return</span>
-
-    <span class="kw">except</span> ImportError:
-        <span class="kw">pass</span>
-
-    <span class="kw">try</span>:
-        <span class="kw">import</span> pyautogui
-        pyautogui.<span class="fn">write</span>(
-            text,
-            interval=delay
-        )
-
-    <span class="kw">except</span> ImportError:
-        <span class="fn">print</span>(
-            <span class="str">"[keyboard_input] No keyboard input library available."</span>
-        )</pre>
-</div>
-
-<h3>Paste sequence</h3>
-
-<p>
-  The <code>@@PASTE@@</code> handler uses the keyboard input module to move the insertion point,
-  create the requested line spacing, and then perform the configured paste action.
-</p>
-
-<div class="code-block">
-  <div class="code-file">keyboard_input.py — paste_from_clipboard_after_two_lines()</div>
-
-<pre><span class="kw">def</span> <span class="fn">paste_from_clipboard_after_two_lines</span>():
-    <span class="kw">if not</span> <span class="fn">_press_key</span>(VK_END):
-        <span class="kw">return False</span>
-
-    time.<span class="fn">sleep</span>(KEY_PRESS_DELAY)
-
-    <span class="kw">if not</span> <span class="fn">_press_key</span>(VK_RETURN):
-        <span class="kw">return False</span>
-
-    time.<span class="fn">sleep</span>(KEY_PRESS_DELAY_SHORT)
-
-    <span class="kw">if not</span> <span class="fn">_press_key</span>(VK_RETURN):
-        <span class="kw">return False</span>
-
-    time.<span class="fn">sleep</span>(KEY_PRESS_DELAY_SHORT)
-
-    <span class="kw">return</span> <span class="fn">_ctrl_v</span>()</pre>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 13 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s13"><span class="num">13</span> clipboard_utils.py — Clipboard Utilities</h2>
-
-<p>
-  <code>clipboard_utils.py</code> is the single source of truth for clipboard operations.
-</p>
-
-<h3>Copying text</h3>
-
-<div class="code-block">
-  <div class="code-file">clipboard_utils.py — copy_to_clipboard()</div>
-
-<pre><span class="kw">def</span> <span class="fn">copy_to_clipboard</span>(text: str) -&gt; bool:
-    <span class="kw">try</span>:
-        <span class="kw">import</span> pyperclip
-
-        pyperclip.<span class="fn">copy</span>(text)
-
-        <span class="kw">return</span> True
-
-    <span class="kw">except</span> Exception <span class="kw">as</span> e:
-        <span class="fn">print</span>(
-            f<span class="str">"[clipboard] pyperclip failed: {e}"</span>
-        )
-
-    <span class="kw">try</span>:
-        <span class="kw">import</span> tkinter <span class="kw">as</span> tk
-
-        root = tk.Tk()
-        root.withdraw()
-
-        root.clipboard_clear()
-        root.clipboard_append(text)
-        root.update()
-
-        root.destroy()
-
-        <span class="kw">return</span> True
-
-    <span class="kw">except</span> Exception <span class="kw">as</span> e:
-        <span class="fn">print</span>(
-            f<span class="str">"[clipboard] Tk fallback failed: {e}"</span>
-        )
-
-        <span class="kw">return False</span></pre>
-</div>
-
-<h3>Reading the current clipboard</h3>
-
-<div class="code-block">
-  <div class="code-file">clipboard_utils.py — get_clipboard_text()</div>
-
-<pre><span class="kw">def</span> <span class="fn">get_clipboard_text</span>() -&gt; str:
-    <span class="kw">try</span>:
-        <span class="kw">import</span> pyperclip
-
-        text = pyperclip.<span class="fn">paste</span>()
-
-        <span class="kw">if</span> text:
-            <span class="fn">print</span>(
-                f<span class="str">"[clipboard] Current clipboard ({len(text)} characters):"</span>
-            )
-            <span class="fn">print</span>(text)
-        <span class="kw">else</span>:
-            <span class="fn">print</span>(
-                <span class="str">"[clipboard] Clipboard is EMPTY."</span>
-            )
-
-        <span class="kw">return</span> text
-
-    <span class="kw">except</span> Exception <span class="kw">as</span> e:
-        <span class="fn">print</span>(
-            f<span class="str">"[clipboard] Could not read clipboard: {e}"</span>
-        )
-
-        <span class="kw">return</span> <span class="str">""</span></pre>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 14 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s14"><span class="num">14</span> Complete Tag Reference</h2>
-
-<table>
-  <tr>
-    <th>Tag</th>
-    <th>AI?</th>
-    <th>Context</th>
-    <th>Purpose</th>
-  </tr>
-
-  <tr>
-    <td>@@ASK: question@@</td>
-    <td><span class="badge b-ai">Yes</span></td>
-    <td>Tag content</td>
-    <td>Ask a short question.</td>
-  </tr>
-
-  <tr>
-    <td>@@ASKALL: question@@</td>
-    <td><span class="badge b-ai">Yes</span></td>
-    <td>Text above tag</td>
-    <td>Ask a question about preceding text/code.</td>
-  </tr>
-
-  <tr>
-    <td>@@SOLVE: task@@</td>
-    <td><span class="badge b-ai">Yes</span></td>
-    <td>Tag content</td>
-    <td>Request a complete solution.</td>
-  </tr>
-
-  <tr>
-    <td>@@SOLVEALL@@</td>
-    <td><span class="badge b-ai">Yes</span></td>
-    <td>Full field</td>
-    <td>Process the complete relevant input as a problem.</td>
-  </tr>
-
-  <tr>
-    <td>@@FIX: instruction@@</td>
-    <td><span class="badge b-ai">Yes</span></td>
-    <td>Text above tag</td>
-    <td>Request a correction or modification using preceding context.</td>
-  </tr>
-
-  <tr>
-    <td>@@COPY: text@@</td>
-    <td><span class="badge b-no">No</span></td>
-    <td>Tag content</td>
-    <td>Copy explicit text to the clipboard.</td>
-  </tr>
-
-  <tr>
-    <td>@@COPYABOVE@@</td>
-    <td><span class="badge b-no">No</span></td>
-    <td>Text above tag</td>
-    <td>Copy preceding text to the clipboard.</td>
-  </tr>
-
-  <tr>
-    <td>@@COPYALL@@</td>
-    <td><span class="badge b-no">No</span></td>
-    <td>Full field</td>
-    <td>Copy the relevant field to the clipboard.</td>
-  </tr>
-
-  <tr>
-    <td>@@CLIPBOARD@@</td>
-    <td><span class="badge b-no">No</span></td>
-    <td>System clipboard</td>
-    <td>Display the current clipboard contents in the console.</td>
-  </tr>
-
-  <tr>
-    <td>@@PASTE@@</td>
-    <td><span class="badge b-no">No</span></td>
-    <td>Keyboard action</td>
-    <td>Run the configured keyboard paste sequence.</td>
-  </tr>
-
-  <tr>
-    <td>@@SCREENSHOT@@</td>
-    <td><span class="badge b-sys">System</span></td>
-    <td>System</td>
-    <td>Capture and save a PNG screenshot.</td>
-  </tr>
-
-  <tr>
-    <td>@@CHAT@@</td>
-    <td><span class="badge b-ai">Gemini</span></td>
-    <td>Persistent session</td>
-    <td>Open the dedicated Gemini conversation interface.</td>
-  </tr>
-</table>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 15 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 id="s15"><span class="num">15</span> End-to-End Example</h2>
-
-<p>
-  Consider the following command:
-</p>
-
-<pre>@@ASK: Why does my loop not stop?@@</pre>
-
-<div class="steps">
-
-  <div class="step">
-    <div class="step-num">1</div>
-    <div class="step-content">
-      <h4>main.py starts a polling cycle</h4>
       <p>
-        The main loop requests the currently focused text from <code>reader.py</code>.
+        The actual functions and their arguments should always be taken from the
+        current source code when making implementation changes.
       </p>
     </div>
-  </div>
+  </section>
 
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-content">
-      <h4>reader.py retrieves the text</h4>
+  <section class="section" id="ui">
+    <div class="section-head">
+      <span class="number">11</span>
+      <h2>ui_window.py — Response and Chat UI</h2>
+    </div>
+
+    <div class="panel">
       <p>
-        Windows UI Automation returns text from the focused control or its relevant parent/tree.
+        The UI layer displays AI responses and manages interactive Gemini chat
+        windows.
+      </p>
+
+      <h3>Normal response window</h3>
+
+      <p>
+        A normal AI operation can display its returned response in the
+        application's response UI.
+      </p>
+
+      <h3>Gemini chat</h3>
+
+      <p>
+        The application maintains an active chat reference so subsequent chat
+        operations can continue the same conversation.
+      </p>
+
+      <h3>Screenshot-aware chat</h3>
+
+      <div class="flow">
+        <div class="flow-box primary">@@SSTOCHAT@@</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Screenshot</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Gemini Chat</div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-box primary">@@SSTOSS@@</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">New Screenshot</div>
+        <span class="arrow">→</span>
+        <div class="flow-box">Existing Chat</div>
+      </div>
+
+      <p>
+        This allows a single Gemini conversation to receive additional screenshots
+        as the user continues working.
+      </p>
+
+      <div class="callout good">
+        <code>@@SSTOSS@@</code> is intended for an already-open screenshot-aware
+        chat. It adds another image instead of creating a completely new chat.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="keyboard">
+    <div class="section-head">
+      <span class="number">12</span>
+      <h2>keyboard_input.py — Keyboard Automation</h2>
+    </div>
+
+    <div class="panel">
+      <p>
+        Keyboard automation is isolated in its own module so handlers can request
+        keyboard actions without directly managing low-level input behavior.
+      </p>
+
+      <p>
+        This separation keeps tag handling focused on what an action should do,
+        while the keyboard module handles how keyboard input is generated.
       </p>
     </div>
-  </div>
+  </section>
 
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-content">
-      <h4>detector.py recognizes the tag</h4>
-      <p>
-        The regular expression extracts <code>ASK</code> and the question content.
-      </p>
+  <section class="section" id="clipboard">
+    <div class="section-head">
+      <span class="number">13</span>
+      <h2>clipboard_utils.py — Clipboard Utilities</h2>
     </div>
-  </div>
 
-  <div class="step">
-    <div class="step-num">4</div>
-    <div class="step-content">
-      <h4>main.py starts debounce timing</h4>
+    <div class="panel">
       <p>
-        The detected tag becomes the pending command.
+        Clipboard operations are centralized in <code>clipboard_utils.py</code>.
+        This module provides the common read/write functionality used by tags
+        that interact with clipboard contents.
       </p>
-    </div>
-  </div>
 
-  <div class="step">
-    <div class="step-num">5</div>
-    <div class="step-content">
-      <h4>The tag remains unchanged</h4>
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">Read</div>
+          <p>Obtain the current clipboard text for processing.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Write</div>
+          <p>Place generated or selected text into the clipboard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="tags">
+    <div class="section-head">
+      <span class="number">14</span>
+      <h2>Complete Tag Reference</h2>
+    </div>
+
+    <div class="panel">
       <p>
-        Once the configured debounce interval has elapsed, the command is ready for processing.
+        Tags use the format <code>@@TAG@@</code> or, for commands that require
+        text, <code>@@TAG: content@@</code>.
       </p>
-    </div>
-  </div>
 
-  <div class="step">
-    <div class="step-num">6</div>
-    <div class="step-content">
-      <h4>tag_handlers.py dispatches the command</h4>
+      <table class="tag-table">
+        <thead>
+          <tr>
+            <th>Tag</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td><code>@@ASK: question@@</code></td>
+            <td>Send a question to the configured AI provider.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@SOLVE: task@@</code></td>
+            <td>Ask the AI provider to solve or work through a task.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@FIX: instruction@@</code></td>
+            <td>Ask the AI provider to fix or modify supplied content according to the instruction.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@COPY: text@@</code></td>
+            <td>Copy the supplied text to the clipboard.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@COPYABOVE@@</code></td>
+            <td>Copy the relevant text above the tag.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@COPYALL@@</code></td>
+            <td>Copy the relevant complete text/context.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@SCREENSHOT@@</code></td>
+            <td>Capture a screenshot and save it locally.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@ASKALL: question@@</code></td>
+            <td>Send a question together with the relevant full context.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@SOLVEALL@@</code></td>
+            <td>Ask the AI to solve using the relevant full context.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@PASTE@@</code></td>
+            <td>Perform the supported paste operation.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@CHAT@@</code></td>
+            <td>Open or use the Gemini chat interface.</td>
+          </tr>
+
+          <tr>
+            <td><code>@@CLIPBOARD@@</code></td>
+            <td>Use clipboard content as supported by the handler.</td>
+          </tr>
+
+          <tr class="tag-special">
+            <td><code>@@SSTOCHAT@@</code></td>
+            <td>Take a screenshot and open a Gemini chat with that screenshot as the initial visual context.</td>
+          </tr>
+
+          <tr class="tag-special">
+            <td><code>@@SSTOSS@@</code></td>
+            <td>Take another screenshot and add it to the already-open screenshot-aware Gemini chat.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout info">
+        The screenshot-aware tags are different from the standalone
+        <code>@@SCREENSHOT@@</code> tag. <code>@@SCREENSHOT@@</code> only performs
+        the screenshot action, while <code>@@SSTOCHAT@@</code> connects the
+        captured screenshot directly to a Gemini chat session.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="example">
+    <div class="section-head">
+      <span class="number">15</span>
+      <h2>End-to-End Examples</h2>
+    </div>
+
+    <div class="panel">
+      <h3>Text request</h3>
+
+<pre>@@ASK: Explain this concept@@</pre>
+
       <p>
-        <code>dispatch()</code> selects <code>handle_ask()</code>.
+        The detector recognizes the tag, the handler extracts the request,
+        the AI provider processes it, and the UI displays the response.
       </p>
-    </div>
-  </div>
 
-  <div class="step">
-    <div class="step-num">7</div>
-    <div class="step-content">
-      <h4>ai_provider.py sends the request</h4>
+      <h3>Screenshot only</h3>
+
+<pre>@@SCREENSHOT@@</pre>
+
       <p>
-        The configured AI provider receives the question and generates a response.
+        The screenshot handler captures the current screen and saves the image
+        according to the application's screenshot workflow.
       </p>
-    </div>
-  </div>
 
-  <div class="step">
-    <div class="step-num">8</div>
-    <div class="step-content">
-      <h4>The response returns</h4>
+      <h3>Start a screenshot-aware Gemini chat</h3>
+
+<pre>@@SSTOCHAT@@</pre>
+
       <p>
-        The provider returns the generated text to the handler.
+        The application captures a screenshot and starts a Gemini chat with the
+        captured image included as visual context.
       </p>
-    </div>
-  </div>
 
-  <div class="step">
-    <div class="step-num">9</div>
-    <div class="step-content">
-      <h4>ui_window.py displays the response</h4>
+      <h3>Add another screenshot to that chat</h3>
+
+<pre>@@SSTOSS@@</pre>
+
       <p>
-        The result is displayed in the desktop response window.
+        The application captures another screenshot and sends it to the existing
+        screenshot-aware chat, allowing the conversation to continue with
+        additional visual context.
       </p>
+
+      <div class="callout good">
+        A useful mental model is:
+        <code>@@SSTOCHAT@@</code> starts the visual conversation;
+        <code>@@SSTOSS@@</code> continues adding visual context to it.
+      </div>
     </div>
-  </div>
+  </section>
 
-</div>
+  <section class="section" id="notes">
+    <div class="section-head">
+      <span class="number">16</span>
+      <h2>Common Problems and Notes</h2>
+    </div>
 
+    <div class="panel">
+      <h3>AI requests do not work</h3>
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 16 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
+      <p>
+        Check that the required provider configuration exists in
+        <code>settings.json</code> and that the selected provider/model is
+        configured correctly.
+      </p>
 
-<h2 id="s16"><span class="num">16</span> Common Problems and Notes</h2>
+      <h3>Tags are not detected</h3>
 
-<div class="alert">
-  Do not commit <code>settings.json</code> if it contains a real API key.
-</div>
+      <p>
+        Check that the tag matches the supported syntax exactly. The detector
+        recognizes the application's defined tag names and delimiters.
+      </p>
 
-<div class="tip">
-  <strong>Tip:</strong> Keep <code>settings.example.json</code> in Git so other installations have a
-  configuration template.
-</div>
+      <h3>Gemini chat does not continue</h3>
 
-<div class="tip">
-  <strong>Tip:</strong> If a tag is not detected, verify that the tag is present in both
-  <code>detector.KNOWN_TAGS</code> and <code>tag_handlers.HANDLERS</code>.
-</div>
+      <p>
+        Chat commands depend on the active chat state maintained by the UI and
+        AI provider layers.
+      </p>
 
-<div class="tip">
-  <strong>Tip:</strong> <code>@@CHAT@@</code> requires Gemini because the current persistent chat
-  implementation uses the Gemini chat API.
-</div>
+      <h3><code>@@SSTOSS@@</code> does not have a chat to update</h3>
 
-<div class="info">
-  <strong>Debugging:</strong> The application prints useful information to the console, including
-  dependency errors, clipboard state, AI request status, and unexpected handler errors.
-</div>
+      <p>
+        <code>@@SSTOSS@@</code> is intended to add a screenshot to an existing
+        screenshot-aware Gemini chat. Start one with <code>@@SSTOCHAT@@</code>
+        first.
+      </p>
 
-<table>
-  <tr>
-    <th>Message</th>
-    <th>Possible Cause</th>
-    <th>Action</th>
-  </tr>
+      <h3>Multiple screenshots</h3>
 
-  <tr>
-    <td>Missing required packages</td>
-    <td>A dependency is not installed.</td>
-    <td>Run <code>scripts\install.bat</code>.</td>
-  </tr>
+      <p>
+        The screenshot-aware workflow supports adding additional screenshots to
+        the active conversation. Each <code>@@SSTOSS@@</code> action captures
+        another image rather than replacing the previous screenshot context.
+      </p>
 
-  <tr>
-    <td>Configuration error</td>
-    <td>An invalid settings value was supplied.</td>
-    <td>Check <code>settings.json</code> against <code>settings.example.json</code>.</td>
-  </tr>
+      <h3>Configuration files</h3>
 
-  <tr>
-    <td>Missing API key</td>
-    <td>The API key is empty or still a placeholder.</td>
-    <td>Configure the local <code>settings.json</code>.</td>
-  </tr>
+      <p>
+        Do not place API keys or other private credentials into documentation,
+        source examples, or public repository files.
+      </p>
 
-  <tr>
-    <td>429 Too Many Requests</td>
-    <td>The provider rate limit was reached.</td>
-    <td>Allow the built-in retry mechanism to run.</td>
-  </tr>
+      <div class="callout warn">
+        This documentation describes the architecture and intended behavior of
+        the current project. The Python source files remain the source of truth
+        for implementation details.
+      </div>
+    </div>
+  </section>
 
-  <tr>
-    <td>Request cannot be empty</td>
-    <td>An AI tag contains no usable content.</td>
-    <td>Add content between the tag markers.</td>
-  </tr>
-
-  <tr>
-    <td>Tag not detected</td>
-    <td>The tag is not recognized or is incomplete.</td>
-    <td>Check the spelling and closing <code>@@</code>.</td>
-  </tr>
-
-  <tr>
-    <td>Clipboard is empty</td>
-    <td>No text is currently available in the system clipboard.</td>
-    <td>Copy text first, then use the clipboard-related command.</td>
-  </tr>
-
-  <tr>
-    <td>CHAT requires Gemini</td>
-    <td>A non-Gemini provider is currently selected.</td>
-    <td>Configure Gemini as the provider for <code>@@CHAT@@</code>.</td>
-  </tr>
-</table>
-
-<a href="#" class="back">↑ Back to top</a>
+  <footer class="footer">
+    <div class="line"></div>
+    SEB BOT · PROJECT DOCUMENTATION
+  </footer>
 
 </div>
 </body>

@@ -1,109 +1,168 @@
 =====================================
-   מדריך תגיות — SEB Bot
-   עדכון אחרון: יולי 2026
+       TAG GUIDE — SEB Bot
+       Last updated: October 2026
 =====================================
 
-איך זה עובד:
-- כותבים תגית בתוך עורך הקוד של Ultracode
-- הסוכן מזהה אוטומטית תוך 2 שניות
-- התשובה מופיעה בחלון קופץ
-- תגיות ה-AI (ASK/ASKALL/SOLVE/SOLVEALL/FIX) נענות ע"י Gemini, Groq או
-  Mistral — הספק נקבע לפי ה-API key שהוגדר ב-settings.json, לא משנה
-  לך כתלמידה מי עונה, החוויה זהה
+HOW IT WORKS:
 
-כללים חשובים:
-- לסיים תמיד עם @@ ולחכות 2 שניות בלי להקליד
-- אל תפתחי קבצי טקסט (כמו מדריך זה) בזמן השימוש — הסוכן עלול לקרוא אותם
-- תגיות כמו SCREENSHOT, COPYALL, COPYABOVE אפשר לכתוב שוב ושוב — עובדות כל פעם
+- Type a tag inside the Ultracode code editor
+- The agent automatically detects the tag
+- The response appears in a popup window or chat window,
+  depending on the tag
+- AI tags (ASK/ASKALL/SOLVE/SOLVEALL/FIX) are handled by
+  Gemini, Groq, or Mistral — the provider is selected based
+  on the API key configured in settings.json
 
-=====================================
- תגיות שאלות והסברים
-=====================================
+IMPORTANT RULES:
 
-@@ASK: שאלה@@
-  מה זה: שאלה טכנית קצרה, ללא קשר לקוד בשדה
-  מה מקבלים: הסבר קצר בעברית (ללא קוד מלא)
-  דוגמה: @@ASK: מה ההבדל בין for ל-while?@@
-
-@@ASKALL: שאלה@@
-  מה זה: שאלה על הקוד שנמצא מעל התגית
-  מה מקבלים: הסבר/תשובה בעברית על הקוד הספציפי שלך
-  שימוש:
-      [הקוד שלך]
-      @@ASKALL: למה הלולאה לא עוצרת?@@
+- Tags using the @@TAG: content@@ format must end with @@
+- Wait for the agent to detect and process the tag
+- Tags such as SCREENSHOT, COPYALL, COPYABOVE, SSTOCHAT,
+  SSTOSS, and CHAT can be used repeatedly according to
+  their purpose
+- SSTOCHAT and SSTOSS are intended for Gemini and screenshot
+  context
 
 =====================================
- תגיות פיתרון קוד
+       QUESTION & EXPLANATION TAGS
 =====================================
 
-@@SOLVE: תיאור משימה@@
-  מה זה: בקשת קוד לפי תיאור
-  מה מקבלים: קוד מוכן + כפתור "כתוב בעורך"
-  דוגמה: @@SOLVE: כתוב פונקציה ב-C++ שמוצאת את המקסימום במערך@@
+@@ASK: question@@
+  What it does: Asks a short technical question without
+                 using the code in the field
+  What you get: An AI explanation/answer
+  Example: @@ASK: What is the difference between for and while?@@
+
+
+@@ASKALL: question@@
+  What it does: Asks a question about the code above the tag
+  What you get: An explanation/answer about the specific code
+  Usage:
+      [your code]
+      @@ASKALL: Why does the loop not stop?@@
+
+=====================================
+             CODE SOLUTION TAGS
+=====================================
+
+@@SOLVE: task description@@
+  What it does: Requests code based on a description
+  What you get: Generated code + option to write it in the editor
+  Example: @@SOLVE: Write a C++ function that finds the maximum in an array@@
+
 
 @@SOLVEALL@@
-  מה זה: פותר את כל התרגיל לפי כל מה שכתוב בשדה
-  מה מקבלים: פיתרון מלא + כפתור "כתוב בעורך"
-  שימוש: כותבים @@SOLVEALL@@ בסוף השדה — הסוכן קורא הכל ופותר
+  What it does: Solves the entire exercise based on everything
+                 written in the field
+  What you get: Complete solution + option to write it in the editor
+  Usage: Write @@SOLVEALL@@ at the end of the field
 
-@@FIX: הוראה@@
-  מה זה: תיקון הקוד שנמצא מעל התגית
-  מה מקבלים: הקוד המתוקן + כפתור "כתוב בעורך"
-  שימוש:
+
+@@FIX: instruction@@
+  What it does: Fixes the code above the tag
+  What you get: Corrected code + option to write it in the editor
+  Usage:
       int max(int a, int b) {
-          return a > b ? a : b
+          return a > b ? a : b;
       }
-      @@FIX: חסרה נקודה-פסיק@@
+      @@FIX: Improve the code@@
 
 =====================================
- תגיות העתקה (ללא AI, מיידי)
+             COPY TAGS
 =====================================
 
-@@COPY: טקסט@@
-  מה זה: שים טקסט ספציפי ב-Clipboard
-  דוגמה: @@COPY: hello world@@
+@@COPY: text@@
+  What it does: Places specific text into the Clipboard
+  Example: @@COPY: hello world@@
+
 
 @@COPYABOVE@@
-  מה זה: שים את כל הטקסט שמעל התגית ב-Clipboard
-  שימוש: כותבים בסוף הקוד שרוצים להעתיק
+  What it does: Places all text above the tag into the Clipboard
+  Usage: Write it at the end of the code you want to copy
+
 
 @@COPYALL@@
-  מה זה: שים את כל תוכן השדה ב-Clipboard
+  What it does: Places the entire field content into the Clipboard
 
 =====================================
- תגיות מערכת
+          CLIPBOARD / INPUT TAGS
+=====================================
+
+@@CLIPBOARD@@
+  What it does: Uses the content currently stored in the Clipboard
+  Usage: @@CLIPBOARD@@
+
+
+@@PASTE@@
+  What it does: Inserts Clipboard content through the input mechanism
+  Usage: @@PASTE@@
+
+=====================================
+              CHAT TAGS
+=====================================
+
+@@CHAT@@
+  What it does: Opens a persistent Gemini chat
+  What you get: A chat window where you can continue the conversation
+  Usage: @@CHAT@@
+
+  The chat keeps the conversation context during the session,
+  allowing you to continue asking questions without starting
+  over each time.
+
+=====================================
+          SCREENSHOT TAGS
 =====================================
 
 @@SCREENSHOT@@
-  מה זה: צילום מסך ברמת Windows 
-  התמונה נשמרת בתיקיית seb_agent/ עם שם תאריך ושעה
-  שימוש: כותבים @@SCREENSHOT@@ בכל מקום
-  הערה: עובד כל פעם מחדש — אפשר לכתוב כמה פעמים שרוצים
+  What it does: Takes a screenshot
+  The image is saved with a timestamp
+  Usage: @@SCREENSHOT@@
+  Note: The tag can be used repeatedly.
+
+
+@@SSTOCHAT@@
+  What it does: Takes a screenshot and opens a Gemini chat
+                 with the screenshot as visual context
+  What you get: A new Gemini chat with the screenshot available
+                as visual context
+  Usage: @@SSTOCHAT@@
+
+  Useful when you want Gemini to answer questions about
+  what is visible in the screenshot.
+
+
+@@SSTOSS@@
+  What it does: Takes another screenshot and adds it to the
+                 currently active Gemini chat
+  What you get: The new screenshot is added to the existing chat
+  Usage: @@SSTOSS@@
+
+  Important:
+  - Start a screenshot-aware chat first using @@SSTOCHAT@@
+  - Every SSTOSS use takes a new screenshot
+  - The new screenshot is added to the same active chat
+  - Multiple screenshots can be added to the same conversation
 
 =====================================
- הדבקה — מה עובד
+            QUICK SUMMARY
 =====================================
 
-אפשרות 1 — הסוכן מקליד לבד:
-  לוחצים "כתוב בעורך" בחלון הקופץ,
-  חוזרים לעורך, הסוכן מקליד תוך 3 שניות.
-
-אפשרות 2 — Clipboard:
-  אחרי COPY/COPYALL/COPYABOVE הטקסט נמצא ב-Clipboard.
-  אם SEB מאפשר Ctrl+V בשדה — מדביקים רגיל.
+Tag               | AI  | Reads Existing Code | Result
+------------------+-----+---------------------+---------------------------
+@@ASK@@           | Yes | No                  | Answer / explanation
+@@ASKALL@@        | Yes | Yes (above)         | Answer about the code
+@@SOLVE@@         | Yes | No                  | New code
+@@SOLVEALL@@      | Yes | Yes (all)           | Complete solution
+@@FIX@@           | Yes | Yes (above)         | Corrected code
+@@COPY@@          | No  | No                  | Clipboard
+@@COPYABOVE@@     | No  | Yes (above)         | Clipboard
+@@COPYALL@@       | No  | Yes (all)           | Clipboard
+@@CLIPBOARD@@     | No  | No                  | Uses Clipboard
+@@PASTE@@         | No  | No                  | Inserts Clipboard
+@@CHAT@@          | Yes | No                  | Persistent Gemini chat
+@@SCREENSHOT@@    | No  | No                  | Screenshot
+@@SSTOCHAT@@      | Yes | No                  | Gemini chat + screenshot
+@@SSTOSS@@        | Yes | No                  | Add screenshot to current chat
 
 =====================================
- טבלת סיכום מהיר
-=====================================
-
-תגית             | שולח ל-AI | קורא קוד קיים | מה מקבלים
------------------+-----------+---------------+-----------
-@@ASK@@          | כן        | לא            | הסבר קצר
-@@ASKALL@@       | כן        | כן (מעל)      | הסבר על הקוד
-@@SOLVE@@        | כן        | לא            | קוד חדש
-@@SOLVEALL@@     | כן        | כן (הכל)      | פיתרון מלא
-@@FIX@@          | כן        | כן (מעל)      | קוד מתוקן
-@@COPY@@         | לא        | לא            | Clipboard
-@@COPYABOVE@@    | לא        | כן (מעל)      | Clipboard
-@@COPYALL@@      | לא        | כן (הכל)      | Clipboard
-@@SCREENSHOT@@   | לא        | לא            | קובץ PNG

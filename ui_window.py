@@ -50,23 +50,27 @@ _active_chat = None
 
 
 # ---------------------------------------------------------------------------
-# Premium Developer theme
+# Warm Developer theme
 # ---------------------------------------------------------------------------
 
-BG = "#0d1117"
-SURFACE = "#151b23"
-SURFACE_HOVER = "#1c2530"
-BORDER = "#263241"
+BG = "#13110c"
+SURFACE = "#1b1811"
+SURFACE_HOVER = "#232017"
+BORDER = "#3b3425"
 
-FG = "#e6edf3"
-MUTED = "#7d8590"
+FG = "#e8e2d2"
+MUTED = "#8f856b"
 
-ACCENT = "#58a6ff"
-ACCENT_HOVER = "#79b8ff"
+ACCENT = "#b7a98a"
+ACCENT_HOVER = "#ded3b4"
 
-SUCCESS = "#3fb950"
-ERROR = "#f85149"
-WARNING = "#d29922"
+SUCCESS = "#4f7a43"
+ERROR = "#c0291f"
+WARNING = "#b7a98a"
+
+PAPER = "#ded3b4"
+PAPER_INK = "#1a1712"
+PAPER_MUTED = "#6b5f48"
 
 TYPE_ELIGIBLE_TAGS = ("SOLVE", "FIX")
 
@@ -96,8 +100,14 @@ def _add_top_bar(root, title: str, subtitle: str = ""):
     )
     top.pack_propagate(False)
 
-    left = tk.Frame(top, bg=BG)
-    left.pack(side="left", fill="y")
+    left = tk.Frame(
+        top,
+        bg=BG,
+    )
+    left.pack(
+        side="left",
+        fill="y",
+    )
 
     tk.Label(
         left,
@@ -105,7 +115,9 @@ def _add_top_bar(root, title: str, subtitle: str = ""):
         bg=BG,
         fg=FG,
         font=("Segoe UI Semibold", 13),
-    ).pack(anchor="w")
+    ).pack(
+        anchor="w",
+    )
 
     if subtitle:
         tk.Label(
@@ -114,7 +126,9 @@ def _add_top_bar(root, title: str, subtitle: str = ""):
             bg=BG,
             fg=MUTED,
             font=("Segoe UI", 8),
-        ).pack(anchor="w")
+        ).pack(
+            anchor="w",
+        )
 
     close_button = tk.Button(
         top,
@@ -183,7 +197,7 @@ def _build_window(tag_type: str, content: str, master) -> tk.Toplevel:
         bg=SURFACE,
         fg=FG,
         insertbackground=FG,
-        selectbackground="#264f78",
+        selectbackground="#594d36",
         selectforeground=FG,
         font=("Cascadia Code", 10),
         relief="flat",
@@ -199,8 +213,14 @@ def _build_window(tag_type: str, content: str, master) -> tk.Toplevel:
         expand=True,
     )
 
-    txt.insert("1.0", content)
-    txt.config(state="disabled")
+    txt.insert(
+        "1.0",
+        content,
+    )
+
+    txt.config(
+        state="disabled",
+    )
 
     controls = tk.Frame(
         root,
@@ -232,16 +252,18 @@ def _build_window(tag_type: str, content: str, master) -> tk.Toplevel:
         font=("Segoe UI Semibold", 9),
         cursor="hand2",
     )
-    copy_button.pack(side="left")
+    copy_button.pack(
+        side="left",
+    )
 
     def make_type_btn():
         btn = tk.Button(
             controls,
             text=f"Type in editor · {TYPE_BUTTON_COUNTDOWN_SECONDS}s",
             bg=accent,
-            fg="#ffffff",
+            fg=PAPER_INK,
             activebackground=ACCENT_HOVER,
-            activeforeground="#ffffff",
+            activeforeground=PAPER_INK,
             relief="flat",
             bd=0,
             padx=16,
@@ -294,7 +316,9 @@ def _build_window(tag_type: str, content: str, master) -> tk.Toplevel:
                 daemon=True,
             ).start()
 
-        btn.config(command=on_click)
+        btn.config(
+            command=on_click,
+        )
 
     if tag_type in TYPE_ELIGIBLE_TAGS:
         make_type_btn()
@@ -439,11 +463,23 @@ def _show_chat(screenshot_path: Optional[str] = None):
         380,
     )
 
-    root.grid_rowconfigure(0, weight=0)
-    root.grid_rowconfigure(1, weight=1)
-    root.grid_rowconfigure(2, weight=0)
+    root.grid_rowconfigure(
+        0,
+        weight=0,
+    )
+    root.grid_rowconfigure(
+        1,
+        weight=1,
+    )
+    root.grid_rowconfigure(
+        2,
+        weight=0,
+    )
 
-    root.grid_columnconfigure(0, weight=1)
+    root.grid_columnconfigure(
+        0,
+        weight=1,
+    )
 
     # ---------------------------------------------------------------
     # Header
@@ -462,7 +498,10 @@ def _show_chat(screenshot_path: Optional[str] = None):
         pady=(10, 8),
     )
 
-    header.grid_columnconfigure(0, weight=1)
+    header.grid_columnconfigure(
+        0,
+        weight=1,
+    )
 
     left = tk.Frame(
         header,
@@ -480,7 +519,9 @@ def _show_chat(screenshot_path: Optional[str] = None):
         bg=BG,
         fg=FG,
         font=("Segoe UI Semibold", 13),
-    ).pack(anchor="w")
+    ).pack(
+        anchor="w",
+    )
 
     subtitle = (
         "Gemini · Screenshot Context"
@@ -494,7 +535,9 @@ def _show_chat(screenshot_path: Optional[str] = None):
         bg=BG,
         fg=MUTED,
         font=("Segoe UI", 8),
-    ).pack(anchor="w")
+    ).pack(
+        anchor="w",
+    )
 
     tk.Button(
         header,
@@ -540,7 +583,7 @@ def _show_chat(screenshot_path: Optional[str] = None):
         bg=SURFACE,
         fg=FG,
         insertbackground=FG,
-        selectbackground="#264f78",
+        selectbackground="#594d36",
         selectforeground=FG,
         font=("Cascadia Code", 9),
         relief="flat",
@@ -559,7 +602,7 @@ def _show_chat(screenshot_path: Optional[str] = None):
 
     conversation.tag_config(
         "user_label",
-        foreground=ACCENT,
+        foreground=ACCENT_HOVER,
         font=("Segoe UI Semibold", 9),
     )
 
@@ -582,7 +625,9 @@ def _show_chat(screenshot_path: Optional[str] = None):
     )
 
     def add_message(sender: str, message: str):
-        conversation.config(state="normal")
+        conversation.config(
+            state="normal",
+        )
 
         if sender == "You":
             label_tag = "user_label"
@@ -603,7 +648,10 @@ def _show_chat(screenshot_path: Optional[str] = None):
             "message",
         )
 
-        conversation.config(state="disabled")
+        conversation.config(
+            state="disabled",
+        )
+
         conversation.see("end")
 
     # The screenshot is already part of Gemini's context.
@@ -666,8 +714,8 @@ def _show_chat(screenshot_path: Optional[str] = None):
         wrap=tk.WORD,
         bg=SURFACE,
         fg=FG,
-        insertbackground=ACCENT,
-        selectbackground="#264f78",
+        insertbackground=ACCENT_HOVER,
+        selectbackground="#594d36",
         selectforeground=FG,
         font=("Cascadia Code", 9),
         relief="flat",
@@ -686,9 +734,9 @@ def _show_chat(screenshot_path: Optional[str] = None):
         input_card,
         text="Send ↑",
         bg=ACCENT,
-        fg="#ffffff",
+        fg=PAPER_INK,
         activebackground=ACCENT_HOVER,
-        activeforeground="#ffffff",
+        activeforeground=PAPER_INK,
         relief="flat",
         bd=0,
         padx=14,
@@ -913,7 +961,9 @@ def _ensure_ui_thread():
         )
         _ui_thread.start()
 
-    _ui_started.wait(timeout=3)
+    _ui_started.wait(
+        timeout=3,
+    )
 
 
 # ---------------------------------------------------------------------------
