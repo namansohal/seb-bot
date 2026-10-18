@@ -4,6 +4,7 @@ Premium Developer UI for SEB Bot.
 Provides:
 - Compact premium dark response windows
 - Compact Gemini chat window
+- Screenshot-aware Gemini chat
 - Copy button
 - Countdown/type button
 - Always-on-top behavior
@@ -19,7 +20,7 @@ from typing import Optional
 
 import keyboard_input
 from clipboard_utils import copy_to_clipboard
-from ai_provider import create_chat
+from ai_provider import create_chat, start_chat_with_screenshot
 from constants import (
     POPUP_GEOMETRY,
     TYPE_BUTTON_COUNTDOWN_SECONDS,
@@ -325,9 +326,15 @@ def _show_response(tag_type: str, content: str):
 # Gemini chat window
 # ---------------------------------------------------------------------------
 
-def _show_chat():
+def _show_chat(screenshot_path: Optional[str] = None):
     try:
-        chat = create_chat()
+        if screenshot_path:
+            chat, initial_response = start_chat_with_screenshot(
+                screenshot_path
+            )
+        else:
+            chat = create_chat()
+            initial_response = None
 
     except Exception as e:
         root = tk.Toplevel(_ui_root)
@@ -461,9 +468,15 @@ def _show_chat():
         font=("Segoe UI Semibold", 13),
     ).pack(anchor="w")
 
+    subtitle = (
+        "Gemini · Screenshot Context"
+        if screenshot_path
+        else "Gemini · Developer Assistant"
+    )
+
     tk.Label(
         left,
-        text="Gemini · Developer Assistant",
+        text=subtitle,
         bg=BG,
         fg=MUTED,
         font=("Segoe UI", 8),
@@ -578,6 +591,36 @@ def _show_chat():
 
         conversation.config(state="disabled")
         conversation.see("end")
+
+    # The screenshot is already part of Gemini's context.
+    # We do not display the image itself in the chat window.
+    if screenshot_path:
+        add_message(
+            "Gemini",
+            "Screenshot attached as the initial context. Ready for your question.",
+        )
+    elif initial_response is not None:
+        initial_text = getattr(
+            initial_response,
+            "text",
+            None,
+        )
+
+        if initial_text:
+            add_message(
+                "Gemini",
+                initial_text,
+            )
+        else:
+            add_message(
+                "Gemini",
+                "Screenshot attached as the initial context. Ready for your question.",
+            )
+    else:
+        add_message(
+            "Gemini",
+            "Ready. Ask me anything about your code or project.",
+        )
 
     # ---------------------------------------------------------------
     # Input area
@@ -759,11 +802,6 @@ def _show_chat():
         enter_handler,
     )
 
-    add_message(
-        "Gemini",
-        "Ready. Ask me anything about your code or project.",
-    )
-
     user_input.focus_set()
 
 
@@ -794,7 +832,7 @@ def _ui_worker():
                         _show_response(*args)
 
                     elif action == "chat":
-                        _show_chat()
+                        _show_chat(*args)
 
             except queue.Empty:
                 pass
@@ -852,8 +890,13 @@ def show(tag_type: str, content: str):
         print(f"[UI] Could not show response window: {e}")
 
 
-def show_chat():
-    """Open a compact dedicated Gemini chat window."""
+def show_chat(screenshot_path: Optional[str] = None):
+    """
+    Open a compact Gemini chat window.
+
+    If screenshot_path is provided, the screenshot becomes
+    the first message/context of the Gemini conversation.
+    """
 
     try:
         _ensure_ui_thread()
@@ -861,7 +904,7 @@ def show_chat():
         _ui_queue.put(
             (
                 "chat",
-                (),
+                (screenshot_path,),
             )
         )
 
